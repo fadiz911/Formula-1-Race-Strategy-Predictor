@@ -57,8 +57,8 @@ Bar charts displaying the calculated DNF Probability and the breakdown of each d
 
 1.  **Clone the Repository:**
     ```bash
-    git clone [YOUR_REPO_URL]
-    cd [YOUR_PROJECT_NAME]
+    git clone https://github.com/fadiz911/Formula-1-Race-Strategy-Predictor.git
+    cd Formula-1-Race-Strategy-Predictor
     ```
 
 2.  **Initialize Environment & Dependencies:**
