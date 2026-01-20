@@ -95,41 +95,54 @@ def get_actual_grid(year, event_name):
 
 def get_driver_recent_form(driver, year, current_round, lookback=5):
     """
-    Scans the last 'lookback' races (same season) to calculate driver form.
-    Form Index < 1.0 means they are driving faster than the field average.
+    ENHANCED: Scans the last 'lookback' races with weighted recency.
+    More recent races get higher weight. Returns form index and confidence score.
     """
     form_scores = []
+    weights = []
     rounds_analyzed = []
     
     start_round = max(1, current_round - lookback)
     
-    for r in range(start_round, current_round):
+    for i, r in enumerate(range(start_round, current_round)):
         try:
-            # Load only Lap Data (Lightweight)
             session = fastf1.get_session(year, r, 'R')
             session.load(laps=True, telemetry=False, weather=False, messages=False)
             
-            # Normalize pace by dividing driver median by field median
             clean = session.laps.pick_quicklaps()
             if clean.empty: continue
             
+            # Field median pace
             field_median = clean['LapTime'].dt.total_seconds().median()
+            
+            # Driver pace
             driver_laps = clean[clean['Driver'] == driver]
             if driver_laps.empty: continue
             
             driver_median = driver_laps['LapTime'].dt.total_seconds().median()
             score = driver_median / field_median
             
+            # Weight more recent races higher (exponential)
+            weight = np.exp(i / lookback)
+            
             form_scores.append(score)
+            weights.append(weight)
             rounds_analyzed.append(session.event['EventName'])
             
         except Exception:
             continue
             
     if not form_scores:
-        return 1.0, [] # No data? Assume average form.
+        return 1.0, [], 0.0  # No data
+    
+    # Weighted average
+    weighted_form = np.average(form_scores, weights=weights)
+    
+    # Confidence: based on number of races and consistency
+    confidence = len(form_scores) / lookback * (1.0 - np.std(form_scores))
+    confidence = np.clip(confidence, 0.0, 1.0)
         
-    return np.mean(form_scores), rounds_analyzed
+    return weighted_form, rounds_analyzed, confidence
 
 def load_prediction_data(year, round_num, event_name):
     """
@@ -199,9 +212,10 @@ def load_prediction_data(year, round_num, event_name):
     
     return final_session, " + ".join(loaded_sources)
 
-def filter_practice_long_runs(laps):
+def filter_practice_long_runs(laps, min_stint_length=4):
     """
-    Finds consistent stints of 4+ laps for reliable degradation modeling.
+    ENHANCED: Finds consistent stints with fuel-load awareness.
+    Filters for race-simulation runs (longer stints, heavier fuel).
     """
     if not isinstance(laps, pd.DataFrame) or laps.empty: return pd.DataFrame()
     laps = laps.copy()
@@ -211,5 +225,30 @@ def filter_practice_long_runs(laps):
         laps['StintLaps'] = laps.groupby(['Driver', 'SourceSession', 'Stint'])['LapNumber'].transform('count')
     else:
         laps['StintLaps'] = laps.groupby(['Driver', 'Stint'])['LapNumber'].transform('count')
+    
+    # Filter for meaningful race-sim stints
+    long_runs = laps[laps['StintLaps'] >= min_stint_length]
+    
+    # Additional quality filter: remove obvious outliers within each stint
+    if not long_runs.empty and 'LapTime' in long_runs.columns:
+        # For each stint, filter laps within 107% of median
+        def filter_stint_outliers(stint_df):
+            if len(stint_df) < 3:
+                return stint_df
+            median_time = stint_df['LapTime'].dt.total_seconds().median()
+            max_time = median_time * 1.07  # 107% rule
+            valid = stint_df['LapTime'].dt.total_seconds() <= max_time
+            return stint_df[valid]
         
-    return laps[laps['StintLaps'] >= 4]
+        if 'SourceSession' in long_runs.columns:
+            long_runs = long_runs.groupby(['Driver', 'SourceSession', 'Stint'], group_keys=False).apply(
+                filter_stint_outliers,
+                include_groups=False
+            )
+        else:
+            long_runs = long_runs.groupby(['Driver', 'Stint'], group_keys=False).apply(
+                filter_stint_outliers,
+                include_groups=False
+            )
+        
+    return long_runs

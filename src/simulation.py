@@ -1,145 +1,187 @@
 import numpy as np
 import random
+from src.reliability_model import apply_reliability_penalty
 
 def calculate_sc_time(pit_loss_avg):
-    """
-    Returns the effective pit stop time under Safety Car/VSC.
-    Under SC, pit loss is drastically reduced as the field slows down.
-    """
-    # Time lost in the pit lane itself (travel + stop) under slow conditions
-    SC_PIT_LOSS = 8.0 
-    return SC_PIT_LOSS 
+    return 8.0 
 
-def simulate_race_history(models, strategy_list, total_laps, grid_position=1, consistencies=None, pit_loss_avg=22.0, driver_form=1.0, safety_car_prob=0.20):
+def simulate_race_history(models, strategy_list, total_laps, grid_position=1, consistencies=0.12, 
+                         driver_form=1.0, safety_car_prob=0.10, driver_code="", session_context=None,
+                         driver_features=None, track_characteristics=None, compound_affinity=None,
+                         reliability_mode: str = "probabilistic"):
     """
-    Runs a SINGLE probabilistic simulation with REACTIONARY PHYSICS.
-    Includes: Form, Fuel, Track Evo, Traffic, Safety Car/Reactive Pit, and type hardening.
+    ENHANCED STABILITY ENGINE V5.0
+    Uses rich feature set for realistic race simulation with track-specific behavior.
+    
+    Args:
+        models: Tire performance models
+        strategy_list: [(compound, laps), ...]
+        total_laps: Race distance
+        grid_position: Starting position
+        consistencies: Driver consistency (std dev)
+        driver_form: Recent form multiplier
+        safety_car_prob: SC probability
+        driver_code: Driver abbreviation
+        session_context: Quali pace reference
+        driver_features: Dict of historical features
+        track_characteristics: Dict of track-specific data
+        compound_affinity: Dict of driver's compound preferences
     """
     history = []
     current_time = 0.0
-    
-    # --- PHYSICS CONSTANTS ---
-    START_FUEL = 110.0
-    BURN_RATE = 105.0 / total_laps 
-    FUEL_PENALTY = 0.035
-    TRACK_EVO = 0.04
-    
-    # Reactive Tire Management Constants
-    CRITICAL_DEGRADATION_THRESHOLD = 0.15 # s/lap/lap increase
-    PIT_LOSS_UNDER_SC = 8.0 
-    
-    current_fuel = START_FUEL
     laps_completed = 0
-    sigma = consistencies if consistencies is not None else 0.2
     
-    current_tire_deg_slope = 0.0
+    # === ENHANCED FEATURE INTEGRATION ===
     
+    # 1. Base tier modifier from quali pace (scaled by qualifying importance)
+    if session_context and driver_code in session_context:
+        all_times = list(session_context.values())
+        best_in_session = min(all_times)
+        driver_time = session_context[driver_code]
+        performance_gap = driver_time / best_in_session
+        # Qualifying importance from track characteristics (0..1)
+        qual_imp = 0.7
+        if track_characteristics:
+            qual_imp = float(track_characteristics.get('qualifying_importance', 0.7))
+        # Reduced weighting: 0.3 + 0.3 instead of 0.5 + 0.4 for softer impact
+        alpha = np.clip(0.3 + 0.3 * qual_imp, 0.3, 0.6)
+        tier_modifier = alpha * performance_gap + (1.0 - alpha)
+    else:
+        tier_modifier = 1.05
+    
+    # 2. Enhanced driver behavior from features
+    WHISPERERS = ['ALB', 'PER', 'SAI', 'BOT', 'HUL', 'MAG']
+    CHARGERS = ['VER', 'NOR', 'LEC', 'HAM', 'PIA', 'RUS', 'ALO']
+    
+    is_whisperer = driver_code in WHISPERERS
+    is_charger = driver_code in CHARGERS
+    
+    # Tire management from features
+    if driver_features and 'tire_management_score' in driver_features:
+        # Lower score = better management = less degradation
+        deg_mult = 0.85 + (driver_features['tire_management_score'] * 0.15)
+    elif is_whisperer:
+        deg_mult = 0.92
+    else:
+        deg_mult = 1.0
+    
+    # Overtaking ability from features
+    if driver_features and 'overtaking_ability' in driver_features:
+        # More positions gained historically = better in traffic
+        overtake_power = 0.8 + (driver_features['overtaking_ability'] * 0.05)
+        overtake_power = np.clip(overtake_power, 0.3, 1.5)
+    elif is_charger:
+        overtake_power = 0.5
+    else:
+        overtake_power = 1.0
+    
+    # Race craft (late-race performance)
+    race_craft_bonus = 0.0
+    if driver_features and 'race_craft' in driver_features:
+        race_craft_bonus = driver_features['race_craft'] * 0.02  # Small bonus per position gained
+    
+    # 3. Track-specific modifiers
+    if track_characteristics:
+        traffic_severity = track_characteristics.get('overtaking_difficulty', 0.5)
+        deg_severity = track_characteristics.get('tire_deg_severity', 1.0)
+        track_evolution_rate = 0.015 if track_characteristics.get('qualifying_importance', 0.7) > 0.75 else 0.010
+        reliability_stress = float(track_characteristics.get('reliability_stress', 1.0))
+    else:
+        traffic_severity = 0.5
+        deg_severity = 1.0
+        track_evolution_rate = 0.010
+        reliability_stress = 1.0
+    
+    # 4. Universal physics
+    FUEL_PENALTY = 0.033
+    TRACK_EVO = track_evolution_rate
+    sigma = consistencies
+    
+    # 5. Compound affinity multipliers
+    compound_multipliers = {}
+    if compound_affinity:
+        for comp in ['SOFT', 'MEDIUM', 'HARD']:
+            compound_multipliers[comp] = compound_affinity.get(f'{comp}_affinity', 1.0)
+    else:
+        compound_multipliers = {'SOFT': 1.0, 'MEDIUM': 1.0, 'HARD': 1.0}
+    
+    # === RACE SIMULATION ===
     for stint_idx, (compound, laps_duration) in enumerate(strategy_list):
         model = models[compound]
         stint_len_planned = int(laps_duration)
+        compound_mult = compound_multipliers.get(compound, 1.0)
         
-        # We need to manually control the loop to allow for early exits (cliffs/SC)
-        # We loop up to the remaining laps in the race
         for lap_in_stint in range(1, total_laps - laps_completed + 1):
-            
-            # --- 1. PRE-LAP CHECKS ---
-            
             laps_completed += 1
             
-            # 1a. Safety Car Check (Random Event per lap)
-            # The probability is spread across all laps (e.g., 20% over 50 laps = 0.4% chance per lap)
-            is_safety_car = (random.random() < (safety_car_prob / total_laps))
+            is_sc = (random.random() < (safety_car_prob / total_laps))
+            must_pit = (lap_in_stint == stint_len_planned) and laps_completed < total_laps
             
-            # 1b. Reactive Pit Check (Tire Cliff)
-            # We only check for a tire cliff if we are past the halfway mark of the planned stint.
-            is_tire_cliff = (current_tire_deg_slope > CRITICAL_DEGRADATION_THRESHOLD and 
-                             lap_in_stint > (stint_len_planned / 2) and
-                             laps_completed < total_laps)
-            
-            # Decide if pit is needed this lap
-            is_last_lap_of_stint_planned = (lap_in_stint == stint_len_planned)
-            
-            must_pit_this_lap = False
-            pit_time_spent = 0.0
-            
-            # Override 1: SC Check (Always pit if SC comes out near ideal pit window)
-            if is_safety_car and laps_completed > 5 and laps_completed < total_laps - 10:
-                must_pit_this_lap = True
-                pit_time_spent = calculate_sc_time(pit_loss_avg) 
-            
-            # Override 2: Tire Cliff Check (Emergency pit)
-            elif is_tire_cliff and not is_last_lap_of_stint_planned:
-                must_pit_this_lap = True
-                pit_time_spent = pit_loss_avg # Normal green flag pit loss
-            
-            # Normal planned pit stop
-            elif is_last_lap_of_stint_planned and laps_completed < total_laps:
-                must_pit_this_lap = True
-                pit_time_spent = pit_loss_avg # Normal green flag pit loss
-
-
-            # --- 2. CALCULATE PACE ---
-            
-            lap_time = 0.0 # Initialize as float
-            
-            if is_safety_car:
-                lap_time = 80.0 + random.gauss(0, 1.0) # SC Laps are ~80 seconds
+            if is_sc:
+                lap_time = 92.0 + random.gauss(0, 0.5)
             else:
-                # Pace based on Model * Form
-                # FIX: model.predict now returns a scalar float (no [0])
-                base_time = model.predict([[lap_in_stint]]) * driver_form
+                # Base tire model pace
+                tire_age = lap_in_stint * deg_mult * deg_severity
+                base_pace = model.predict([[tire_age]])
                 
-                # Physics
-                fuel_cost = current_fuel * FUEL_PENALTY
-                track_gain = laps_completed * TRACK_EVO
+                # Apply modifiers
+                effective_pace = base_pace * tier_modifier * compound_mult
                 
-                # Traffic/Dirty Air
-                traffic_lag = 0.0
-                if grid_position > 1:
-                    clearance_luck = random.uniform(0.8, 1.2)
-                    traffic_lag = (grid_position * 0.08 * clearance_luck) * np.exp(-0.25 * laps_completed)
+                # Traffic (reduces over time, affected by track characteristics)
+                traffic_adj = (grid_position - 1) * 0.04 * traffic_severity * overtake_power * np.exp(-0.1 * laps_completed)
                 
-                # Noise
-                noise = random.gauss(0, sigma)
+                # Fuel effect (decreasing weight)
+                fuel_effect = (110.0 - (laps_completed * (105.0 / total_laps))) * FUEL_PENALTY
                 
-                lap_time = base_time + fuel_cost - track_gain + traffic_lag + noise
+                # Track evolution (lap times drop as track rubbers in)
+                track_evo_effect = -laps_completed * TRACK_EVO
+                
+                # Late-race craft bonus (kicks in after 50% distance)
+                race_progress = laps_completed / total_laps
+                craft_effect = race_craft_bonus if race_progress > 0.5 else 0.0
+                
+                # Driver form and consistency
+                form_effect = effective_pace * (driver_form - 1.0)
+                consistency_noise = random.gauss(0, sigma)
+                
+                lap_time = (effective_pace + form_effect + fuel_effect + 
+                           track_evo_effect + traffic_adj + craft_effect + consistency_noise)
             
-            # Standing Start Penalty
-            if laps_completed == 1: lap_time += 4.5
+            # First lap adjustment
+            if laps_completed == 1:
+                lap_time += 4.0
             
-            # --- 3. PHYSICS UPDATE ---
-            # FIX: Ensure lap_time is a float before accumulation
             current_time += float(lap_time)
-            current_fuel -= BURN_RATE
-            
             history.append(current_time)
             
-            # --- 4. POST-LAP CHECKS (PIT & DEGRADATION) ---
-
-            # Estimate Degradation Slope for Reactive Check
-            if laps_completed > 1 and not is_safety_car:
-                 # Check the change in pace relative to the last lap
-                 current_deg_estimate = lap_time - history[-2] 
-                 # We subtract the speed gain expected from fuel burn/track evolution (~0.075s/lap total)
-                 current_tire_deg_slope = max(0.0, current_deg_estimate - 0.075)
-
-            # Pit Stop Execution
-            if must_pit_this_lap and laps_completed < total_laps:
-                # FIX: Ensure pit_time_spent is a float before accumulation
-                current_time += float(pit_time_spent)
-                
-                # We need to break out of this inner loop to move to the next stint
-                break 
-
-            # Fuel DNF Check
-            if current_fuel <= 0: return history, f"DNF (Fuel) L{laps_completed}"
-
-            # If the race finishes this lap
+            # Pit decision
+            if must_pit or (is_sc and 10 < laps_completed < total_laps - 10):
+                current_time += 22.0 if not is_sc else 8.0
+                break
+            
             if laps_completed == total_laps:
+                # Apply reliability penalty at finish (DNF modeling / conservative risk)
+                if driver_features and ('reliability_risk' in driver_features):
+                    final_time = history[-1]
+                    adjusted_time, dnf = apply_reliability_penalty(
+                        final_time,
+                        driver_features,
+                        track_factor=reliability_stress,
+                        sim_mode=reliability_mode,
+                    )
+                    history[-1] = adjusted_time
+                    return history, ("DNF" if dnf else "Finished")
                 return history, "Finished"
-
-    # If the simulation somehow finishes the outer stint loop before total_laps
-    if laps_completed < total_laps:
-        return history, f"DNF (Strategy Error) L{laps_completed}"
-        
+    
+    # Apply reliability if we somehow exit loop without explicit finish
+    if driver_features and ('reliability_risk' in driver_features) and history:
+        final_time = history[-1]
+        adjusted_time, dnf = apply_reliability_penalty(
+            final_time,
+            driver_features,
+            track_factor=reliability_stress,
+            sim_mode=reliability_mode,
+        )
+        history[-1] = adjusted_time
+        return history, ("DNF" if dnf else "Finished")
     return history, "Finished"

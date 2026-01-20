@@ -23,6 +23,12 @@ try:
     from src.strategy_engine import train_tire_model, calculate_field_deltas
     from src.optimizer import optimize_strategy
     from src.simulation import simulate_race_history
+    from src.feature_engineering import (
+        extract_driver_historical_features,
+        extract_track_characteristics,
+        extract_driver_compound_affinity,
+        build_feature_matrix
+    )
 except ImportError as e:
     print(f"Error importing required modules. Ensure 'src/predictor.py', etc., exist.")
     print(f"Details: {e}")
@@ -132,13 +138,33 @@ def run_f1_simulation():
     except: total_laps = 57
     print(f" -> Total Race Laps: {total_laps}. Analyzing {len(grid_drivers)} drivers.")
 
-    # 3. ANALYZE FORM
-    print("\n[2/4] Analyzing Driver Form (Last 5 Races)...")
+    # 3. EXTRACT FEATURES
+    print("\n[2/4] Extracting Enhanced Features...")
+    
+    # Get track characteristics
+    track_chars = extract_track_characteristics(TARGET_YEAR, SELECTED_RACE)
+    print(f" -> Track overtaking difficulty: {track_chars['overtaking_difficulty']:.2f}")
+    print(f" -> Qualifying importance: {track_chars['qualifying_importance']:.2f}")
+    
+    # Get driver features
     form_data = {}
+    driver_features_map = {}
+    compound_affinity_map = {}
+    
     for driver in grid_drivers:
-        form_index, _ = get_driver_recent_form(driver, TARGET_YEAR, round_num)
+        # Enhanced form with confidence
+        form_index, _, confidence = get_driver_recent_form(driver, TARGET_YEAR, round_num)
         form_data[driver] = form_index
-    print(f" -> Form data calculated for {len(form_data)} drivers.")
+        
+        # Historical features
+        features, races_used = extract_driver_historical_features(driver, TARGET_YEAR, round_num)
+        driver_features_map[driver] = features
+        
+        # Compound affinity
+        affinity = extract_driver_compound_affinity(driver, TARGET_YEAR, round_num)
+        compound_affinity_map[driver] = affinity
+    
+    print(f" -> Enhanced features extracted for {len(grid_drivers)} drivers.")
     
     # 4. RUN MONTE CARLO
     print("\n[3/4] Running Monte Carlo Simulation...")
@@ -167,15 +193,19 @@ def run_f1_simulation():
             
         driver_times = []
         
-        # SIMULATION LOOP (Simplified Convergence Check for console)
+        # SIMULATION LOOP with enhanced features
         for sim_idx in range(SIM_COUNT):
             hist, run_status = simulate_race_history(
                 models, strat_list, total_laps, 
                 grid_position=start_pos, 
                 consistencies=0.15, 
-                pit_loss_avg=22.5,
                 driver_form=form_data.get(driver, 1.0),
-                safety_car_prob=SC_PROB
+                safety_car_prob=SC_PROB,
+                driver_code=driver,
+                session_context={d: fastest_laps.get(d, 90.0) for d in grid_drivers},
+                driver_features=driver_features_map.get(driver, {}),
+                track_characteristics=track_chars,
+                compound_affinity=compound_affinity_map.get(driver, {})
             )
             
             # Record time, penalizing DNF heavily
