@@ -8,7 +8,7 @@ def calculate_sc_time(pit_loss_avg):
 def simulate_race_history(models, strategy_list, total_laps, grid_position=1, consistencies=0.12, 
                          driver_form=1.0, safety_car_prob=0.10, driver_code="", session_context=None,
                          driver_features=None, track_characteristics=None, compound_affinity=None,
-                         reliability_mode: str = "probabilistic"):
+                         reliability_mode: str = "probabilistic", ml_correction=0.0):
     """
     ENHANCED STABILITY ENGINE V5.0
     Uses rich feature set for realistic race simulation with track-specific behavior.
@@ -97,13 +97,25 @@ def simulate_race_history(models, strategy_list, total_laps, grid_position=1, co
     TRACK_EVO = track_evolution_rate
     sigma = consistencies
     
+    
     # 5. Compound affinity multipliers
     compound_multipliers = {}
+    
+    # Get Dynamic Pit Loss
+    PIT_LOSS = 22.0
+    if track_characteristics:
+         PIT_LOSS = track_characteristics.get('avg_pit_loss', 22.0)
+         
     if compound_affinity:
         for comp in ['SOFT', 'MEDIUM', 'HARD']:
             compound_multipliers[comp] = compound_affinity.get(f'{comp}_affinity', 1.0)
     else:
         compound_multipliers = {'SOFT': 1.0, 'MEDIUM': 1.0, 'HARD': 1.0}
+    
+    # 6. ML Correction (Bias Application)
+    # Distribute the correction across laps to maintain smooth graph
+    # If ML says driver is 10s slower (positive), we add time to each lap.
+    lap_bias = ml_correction / max(1, total_laps)
     
     # === RACE SIMULATION ===
     for stint_idx, (compound, laps_duration) in enumerate(strategy_list):
@@ -121,8 +133,8 @@ def simulate_race_history(models, strategy_list, total_laps, grid_position=1, co
                 lap_time = 92.0 + random.gauss(0, 0.5)
             else:
                 # Base tire model pace
-                tire_age = lap_in_stint * deg_mult * deg_severity
-                base_pace = model.predict([[tire_age]])
+                tire_age = float(lap_in_stint * deg_mult * deg_severity)
+                base_pace = model.predict(tire_age)
                 
                 # Apply modifiers
                 effective_pace = base_pace * tier_modifier * compound_mult
@@ -144,8 +156,32 @@ def simulate_race_history(models, strategy_list, total_laps, grid_position=1, co
                 form_effect = effective_pace * (driver_form - 1.0)
                 consistency_noise = random.gauss(0, sigma)
                 
+                # Tire Warmup Penalty (Cold tires on out-lap)
+                warmup_penalty = 0.0
+                if lap_in_stint == 1 and laps_completed > 1: # Out-lap (not race start)
+                     if compound == 'HARD': warmup_penalty = 3.5
+                     elif compound == 'MEDIUM': warmup_penalty = 1.5
+                     elif compound == 'SOFT': warmup_penalty = 0.5
+                
+                     elif compound == 'SOFT': warmup_penalty = 0.5
+                
+                # Re-entry Traffic (Dirty Air after Pit Stop)
+                # Simulates getting stuck behind slower cars if pitting early (Dense field)
+                traffic_penalty = 0.0
+                if lap_in_stint <= 3 and laps_completed > 5: # First 3 laps of a post-pit stint
+                     # Field density is high early in the race (Laps 1-20)
+                     # Penalty decays as race progresses (field spreads out)
+                     field_spread_factor = max(0.0, 1.0 - (laps_completed / (total_laps * 0.7)))
+                     # Higher grid position (slower car) = more likely to effect you? 
+                     # Actually, if you are fast (Grid 1) and pit early, you fall into traffic (Grid 10-20).
+                     # So penalty is HIGHER for fast cars pitting early.
+                     if grid_position <= 8: # Top teams suffer most from traffic
+                         traffic_penalty = random.uniform(0.5, 1.5) * field_spread_factor * traffic_severity
+                     else:
+                         traffic_penalty = random.uniform(0.0, 0.5) * field_spread_factor * traffic_severity
+
                 lap_time = (effective_pace + form_effect + fuel_effect + 
-                           track_evo_effect + traffic_adj + craft_effect + consistency_noise)
+                           track_evo_effect + traffic_adj + craft_effect + consistency_noise + lap_bias + warmup_penalty + traffic_penalty)
             
             # First lap adjustment
             if laps_completed == 1:
@@ -156,7 +192,7 @@ def simulate_race_history(models, strategy_list, total_laps, grid_position=1, co
             
             # Pit decision
             if must_pit or (is_sc and 10 < laps_completed < total_laps - 10):
-                current_time += 22.0 if not is_sc else 8.0
+                current_time += PIT_LOSS if not is_sc else 8.0
                 break
             
             if laps_completed == total_laps:

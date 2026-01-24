@@ -185,6 +185,7 @@ def extract_track_characteristics(year, race_name, lookback_years=2):
         sc_count = 0
         races_found = 0
         compound_performance = defaultdict(list)
+        pit_losses = []
         
         for year_offset in range(lookback_years + 1):
             check_year = year - year_offset
@@ -232,6 +233,33 @@ def extract_track_characteristics(year, race_name, lookback_years=2):
                         if len(compound_laps) > 10:
                             avg_time = compound_laps['LapTime'].dt.total_seconds().mean()
                             compound_performance[compound].append(avg_time)
+                            
+                    # Pit Loss Calculation (In-Lap + Out-Lap Delta)
+                    pit_in_laps = session.laps[session.laps['PitInTime'].notna()]
+                    pit_out_laps = session.laps[session.laps['PitOutTime'].notna()]
+                    
+                    if not pit_in_laps.empty and not pit_out_laps.empty:
+                        # Median clean lap
+                        median_pace = all_laps['LapTime'].dt.total_seconds().median()
+                        
+                        # Calculate In-Lap Loss (Entry)
+                        in_lap_times = pit_in_laps['LapTime'].dt.total_seconds()
+                        # Filter crazy outliers (e.g., changing nose)
+                        in_lap_times = in_lap_times[in_lap_times < median_pace + 30] 
+                        if not in_lap_times.empty:
+                            avg_in_loss = in_lap_times.median() - median_pace
+                        else: avg_in_loss = 3.0 # Fallback
+                        
+                        # Calculate Out-Lap Loss (Exit + Stationary)
+                        out_lap_times = pit_out_laps['LapTime'].dt.total_seconds()
+                        out_lap_times = out_lap_times[out_lap_times < median_pace + 40]
+                        if not out_lap_times.empty:
+                            avg_out_loss = out_lap_times.median() - median_pace
+                        else: avg_out_loss = 19.0 # Fallback
+                        
+                        total_loss = avg_in_loss + avg_out_loss
+                        if 15.0 < total_loss < 35.0: # Sanity check for F1 pit stops
+                             pit_losses.append(total_loss)
                 
                 except:
                     pass
@@ -264,7 +292,15 @@ def extract_track_characteristics(year, race_name, lookback_years=2):
                 best_compound = min(compound_performance.keys(), 
                                   key=lambda c: np.mean(compound_performance[c]))
                 characteristics['compound_preference'] = best_compound
-    
+
+            # PIT LOSS CALCULATION
+            if pit_losses:
+                 characteristics['avg_pit_loss'] = np.mean(pit_losses)
+                 print(f"      Calculated Pit Loss: {characteristics['avg_pit_loss']:.1f}s")
+            else:
+                 characteristics['avg_pit_loss'] = 22.0
+
+            
     except Exception as e:
         print(f"   ⚠️ Track learning limited: {e}")
     

@@ -25,7 +25,7 @@ import fastf1
 
 from typing import List, Tuple
 
-from src.predictor import load_prediction_data, filter_practice_long_runs, get_driver_recent_form
+from src.predictor import load_prediction_data, filter_practice_long_runs, get_driver_recent_form, AnchoredModel, train_anchored_models
 from src.strategy_engine import train_tire_model, calculate_field_deltas
 from src.optimizer import optimize_strategy
 from src.simulation import simulate_race_history
@@ -35,6 +35,7 @@ from src.feature_engineering import (
     extract_track_characteristics,
     extract_driver_compound_affinity,
 )
+from src.dl_predictor import DLPredictor
 
 
 def get_round_from_name(year: int, race_name: str) -> int:
@@ -59,52 +60,6 @@ def get_round_from_name(year: int, race_name: str) -> int:
     raise ValueError(f"Could not resolve round number for {year} {race_name}")
 
 
-class AnchoredModel:
-    def __init__(self, quali_pace: float, deg_slope: float, compound_offset: float):
-        self.base_pace = float(quali_pace) + float(compound_offset)
-        self.deg_slope = float(deg_slope)
-
-    def predict(self, X):
-        X = np.array(X)
-        if len(X.shape) > 1:
-            lap_age = X[:, 0]
-        else:
-            lap_age = X.flatten()
-        prediction = self.base_pace + (lap_age * self.deg_slope)
-        return float(prediction.item()) if prediction.size == 1 else prediction.astype(float)
-
-
-def train_anchored_models(session, driver: str, fastest_laps: pd.Series):
-    try:
-        quali_pace = float(fastest_laps[driver])
-    except Exception:
-        quali_pace = float(np.median(fastest_laps.values))
-
-    deg_slopes = {'SOFT': 0.12, 'MEDIUM': 0.08, 'HARD': 0.05}
-
-    try:
-        # Use available practice/race laps to tune slopes per compound
-        all_laps = session.laps
-        laps = all_laps[all_laps['Driver'] == driver]
-        laps = laps.dropna(subset=['LapTime'])
-        laps = laps[laps['PitInTime'].isna() & laps['PitOutTime'].isna()]
-        laps = filter_practice_long_runs(laps)
-        if not laps.empty:
-            for comp in ['SOFT', 'MEDIUM', 'HARD']:
-                model = train_tire_model(laps, comp)
-                if model:
-                    t1 = model.predict([[1]])
-                    t2 = model.predict([[2]])
-                    slope = max(0.0, float(t2) - float(t1))
-                    if slope > 0.25:
-                        slope = 0.15
-                    deg_slopes[comp] = slope
-    except Exception:
-        pass
-
-    offsets = {'SOFT': 0.0, 'MEDIUM': 0.5, 'HARD': 1.0}
-    models = {c: AnchoredModel(quali_pace, deg_slopes[c], offsets[c]) for c in ['SOFT', 'MEDIUM', 'HARD']}
-    return models
 
 
 def parse_cases(args: argparse.Namespace) -> List[Tuple[int, str]]:
@@ -139,19 +94,80 @@ def run_case(year: int, race_name: str, sim_count: int, max_drivers: int, consis
 
     # Contexts
     track_chars = extract_track_characteristics(year, race_name)
+    field_data = calculate_field_deltas(session)
     session_context = fastest_laps.to_dict()
 
     results_agg = []
 
-    for i, driver in enumerate(grid_drivers):
-        models = train_anchored_models(session, driver, fastest_laps)
-        strat_name, strat_laps, _ = optimize_strategy(models, total_laps)
+    results_agg = []
+    
+    # DL & Strategy Setup
+    dl_predictor = DLPredictor()
+    driver_strategies = {}
+    baseline_times = {}
 
+    # Feature Context (Rolling)
+    # We need to compute rolling points for this specific race context dynamically
+    # For now, we'll fetch the driver's ACTUAL points up to this round and pass it
+    # Simplified: We just pass the season avg * 5 or fetch real standinds.
+    # Let's use a helper or simple calc.
+    
+    # Calibration Phase
+    for i, driver in enumerate(grid_drivers):
+        models = train_anchored_models(session, driver, field_data, fastest_laps)
+        strat_name, strat_laps, _ = optimize_strategy(models, total_laps)
+        
         if "1-Stop" in strat_name:
             strat_list = [('SOFT', int(strat_laps)), ('HARD', int(total_laps - int(strat_laps)))]
         else:
             l1, l2 = strat_laps
             strat_list = [('SOFT', int(l1)), ('MEDIUM', int(l2 - l1)), ('HARD', int(total_laps - l2))]
+            
+        driver_strategies[driver] = (models, strat_list, strat_name, strat_laps)
+        
+        # Baseline Sim
+        hist, _ = simulate_race_history(
+            models, strat_list, total_laps,
+            grid_position=10, consistencies=0.0,
+            driver_form=1.0, safety_car_prob=0,
+            driver_code=driver, session_context=session_context,
+            driver_features={}, track_characteristics=track_chars
+        )
+        baseline_times[driver] = hist[-1]
+        
+    # Calculate ML Corrections
+    sorted_drivers = sorted(baseline_times.keys(), key=lambda x: baseline_times[x])
+    sim_ranks = {d: i+1 for i, d in enumerate(sorted_drivers)}
+    ml_corrections = {}
+
+    if dl_predictor.loaded:
+        for i, driver in enumerate(grid_drivers):
+            # Start Pos
+            s_pos = i + 1
+            if hasattr(session, 'official_grid') and driver in session.official_grid:
+                s_pos = int(session.official_grid[driver])
+            
+            # Team
+            team_name = "Unknown"
+            try:
+                res = session.results
+                team_name = res[res['Abbreviation'] == driver]['TeamName'].iloc[0]
+            except: pass
+            
+            # Rolling Points (Approximation for evaluation without full history scan)
+            # In a real app we'd query the DB. Here we estimate from current standings or use a default.
+            # Let's try to get actual points from the result row if available (points before race?)
+            # Actually 'Points' in result is points WON. We need total points.
+            # Fallback: Use 8.0 (Midfield)
+            rolling_p = 8.0 
+            
+            corr = dl_predictor.get_correction_factor(
+                driver, s_pos, team_name, race_name, year, round_num, rolling_p, sim_ranks[driver]
+            )
+            ml_corrections[driver] = corr
+
+    for i, driver in enumerate(grid_drivers):
+        models, strat_list, strat_name, strat_laps = driver_strategies[driver]
 
         # Start position
         start_pos = i + 1
@@ -176,6 +192,7 @@ def run_case(year: int, race_name: str, sim_count: int, max_drivers: int, consis
                 driver_features=driver_features,
                 track_characteristics=track_chars,
                 compound_affinity=compound_affinity,
+                ml_correction=ml_corrections.get(driver, 0.0)
             )
             times.append(hist[-1])
 

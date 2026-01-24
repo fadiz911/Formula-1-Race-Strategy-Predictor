@@ -2,12 +2,33 @@ import fastf1
 import pandas as pd
 import numpy as np
 import os
+from src.strategy_engine import train_tire_model
 
 # --- 1. ENABLE CACHE ---
 # Create 'cache' folder if it doesn't exist and enable fastf1 caching
 if not os.path.exists('cache'):
     os.makedirs('cache')
 fastf1.Cache.enable_cache('cache')
+
+class AnchoredModel:
+    """
+    Optimized Linear Tire Model.
+    """
+    def __init__(self, quali_pace, deg_slope, compound_offset):
+        self.base_pace = float(quali_pace) + float(compound_offset)
+        self.deg_slope = float(deg_slope)
+        
+    def predict(self, X):
+        # Optimized for scalar input (common in simulation loop)
+        if isinstance(X, (int, float)):
+             return self.base_pace + (X * self.deg_slope)
+             
+        # Vectorized input
+        X = np.asarray(X)
+        if X.ndim > 1: lap_age = X[:, 0]
+        else: lap_age = X.ravel() # fast flatten
+        
+        return self.base_pace + (lap_age * self.deg_slope)
 
 class CombinedSession:
     """
@@ -17,7 +38,46 @@ class CombinedSession:
         self.laps = laps
         self.total_laps = total_laps
         self.event = {'EventName': event_name}
+        self.event = {'EventName': event_name}
         self.official_grid = {} 
+
+def train_anchored_models(session, driver, field_data, fastest_laps):
+    try: quali_pace = float(fastest_laps[driver])
+    except: quali_pace = float(fastest_laps.median())
+    
+    deg_slopes = {'SOFT': 0.12, 'MEDIUM': 0.08, 'HARD': 0.05}
+    if field_data:
+        # Use field averages as better defaults
+        deg_slopes['MEDIUM'] = deg_slopes['SOFT'] - field_data.get('SOFT_TO_MEDIUM_DEG', 0.04)
+        deg_slopes['HARD'] = deg_slopes['MEDIUM'] - field_data.get('MEDIUM_TO_HARD_DEG', 0.03)
+
+    try:
+        # Extract laps directly from session
+        laps = session.laps
+        driver_laps = laps[laps['Driver'] == driver]
+        long_runs = filter_practice_long_runs(driver_laps)
+        
+        if not long_runs.empty:
+            for c in ['SOFT', 'MEDIUM', 'HARD']:
+                model = train_tire_model(long_runs, c)
+                if model:
+                    # Predict scalar tire age 1 and 2
+                    t1 = model.predict([[1]])[0] 
+                    t2 = model.predict([[2]])[0]
+                    deg_slopes[c] = max(0.0, float(t2 - t1))
+    except Exception as e:
+        pass
+        
+    models = {}
+    offsets = {'SOFT': 0.0, 'MEDIUM': 0.5, 'HARD': 1.0}
+    
+    if field_data:
+         offsets['MEDIUM'] = field_data.get('SOFT_TO_MEDIUM_SPEED', 0.5)
+         offsets['HARD'] = offsets['MEDIUM'] + field_data.get('MEDIUM_TO_HARD_SPEED', 0.5)
+
+    for c in ['SOFT', 'MEDIUM', 'HARD']:
+        models[c] = AnchoredModel(quali_pace, deg_slopes[c], offsets[c])
+    return models
 
 def get_race_result_grid(year, event_name):
     """

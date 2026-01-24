@@ -19,10 +19,11 @@ fastf1.Cache.enable_cache('cache')
 # --- Import Core Logic ---
 # Ensure these files are accessible in your environment (e.g., in a 'src' directory)
 try:
-    from src.predictor import load_prediction_data, filter_practice_long_runs, get_driver_recent_form
+    from src.predictor import load_prediction_data, filter_practice_long_runs, get_driver_recent_form, AnchoredModel, train_anchored_models
     from src.strategy_engine import train_tire_model, calculate_field_deltas
     from src.optimizer import optimize_strategy
     from src.simulation import simulate_race_history
+    from src.ml_predictor import MLPredictor
     from src.feature_engineering import (
         extract_driver_historical_features,
         extract_track_characteristics,
@@ -68,22 +69,6 @@ def format_strategy(strat_name, strat_laps, total_laps):
         return f"S {l1} / H {l2_len} / S {l3_len}"
     return "N/A"
 
-class AnchoredModel:
-    def __init__(self, quali_pace, deg_slope, compound_offset):
-        self.base_pace = float(quali_pace) + float(compound_offset)
-        self.deg_slope = float(deg_slope)
-        
-    def predict(self, X):
-        X = np.array(X)
-        if len(X.shape) > 1: lap_age = X[:, 0]
-        else: lap_age = X.flatten() 
-        
-        prediction = self.base_pace + (lap_age * self.deg_slope)
-        
-        if prediction.size == 1:
-            return float(prediction.item())
-        else:
-            return prediction.astype(float)
 
 
 # --- MAIN EXECUTION FUNCTION ---
@@ -167,22 +152,80 @@ def run_f1_simulation():
     print(f" -> Enhanced features extracted for {len(grid_drivers)} drivers.")
     
     # 4. RUN MONTE CARLO
-    print("\n[3/4] Running Monte Carlo Simulation...")
+    print("\n[3/4] Running Monte Carlo Simulation (Hybrid ML Mode)...")
+    
+    # Initialize ML Predictor
+    ml_predictor = MLPredictor()
+    
     results_agg = []
+    
+    # PRE-CALCULATION: Strategy & Baseline Pace
+    driver_strategies = {}
+    baseline_times = {}
+    
+    print("      -> calibration phase: calculating baseline physics...")
+    for i, driver in enumerate(grid_drivers):
+        # Train models & Optimize Strategy
+        models = train_anchored_models(session, driver, field_data, fastest_laps)
+        strat_name, strat_laps, _ = optimize_strategy(models, total_laps)
+        
+        if "1-Stop" in strat_name: 
+            strat_list = [('SOFT', strat_laps), ('HARD', total_laps - strat_laps)]
+        else: 
+            l1 = strat_laps[0]
+            strat_list = [('SOFT', l1), ('MEDIUM', strat_laps[1]-l1), ('HARD', total_laps-strat_laps[1])]
+            
+        driver_strategies[driver] = (models, strat_list, strat_name, strat_laps)
+        
+        # Run 1 deterministic sim for baseline
+        start_pos = -1 # Temporary
+        hist, _ = simulate_race_history(
+            models, strat_list, total_laps, 
+            grid_position=10, # Neutral Assumption for pace check
+            consistencies=0.0, 
+            driver_form=form_data.get(driver, 1.0),
+            safety_car_prob=0,
+            driver_code=driver,
+            session_context={d: fastest_laps.get(d, 90.0) for d in grid_drivers},
+            driver_features=driver_features_map.get(driver, {}),
+            track_characteristics=track_chars,
+            compound_affinity=compound_affinity_map.get(driver, {})
+        )
+        baseline_times[driver] = hist[-1]
+
+    # Calculate Rankings & Corrections
+    sorted_drivers = sorted(baseline_times.keys(), key=lambda x: baseline_times[x])
+    sim_ranks = {d: i+1 for i, d in enumerate(sorted_drivers)}
+    
+    ml_corrections = {}
+    if ml_predictor.loaded:
+        print("      -> applying ML corrections...")
+        for i, driver in enumerate(grid_drivers):
+            # Get actual start pos for context
+            s_pos = i + 1
+            if driver in GRID_OVERRIDES and GRID_OVERRIDES[driver] > 0: s_pos = GRID_OVERRIDES[driver]
+            elif hasattr(session, 'official_grid') and driver in session.official_grid: s_pos = session.official_grid[driver]
+            
+            # Get team name
+            team_name = "Unknown"
+            # Try to fetch from session results if possible, or use lookup
+            try:
+                res = session.results
+                team_name = res[res['Abbreviation'] == driver]['TeamName'].iloc[0]
+            except: pass
+            
+            correction = ml_predictor.get_correction_factor(
+                driver, s_pos, team_name, SELECTED_RACE, TARGET_YEAR, sim_ranks[driver]
+            )
+            ml_corrections[driver] = correction
+            if abs(correction) > 2.0:
+               print(f"         * {driver}: ML {correction:+.1f}s adjustment")
     
     for i, driver in enumerate(grid_drivers):
         sys.stdout.write(f"\r  -> Simulating {driver} ({i+1}/{len(grid_drivers)})...")
         sys.stdout.flush()
         
-        # Train & Optimize Strategy
-        models = train_anchored_models(session, driver, field_data, fastest_laps)
-        strat_name, strat_laps, _ = optimize_strategy(models, total_laps)
-        
-        if strat_name == "1-Stop": 
-            strat_list = [('SOFT', strat_laps), ('HARD', total_laps - strat_laps)]
-        else: 
-            l1 = strat_laps[0]
-            strat_list = [('SOFT', l1), ('HARD', strat_laps[1]-l1), ('SOFT', total_laps-strat_laps[1])]
+        models, strat_list, strat_name, strat_laps = driver_strategies[driver]
             
         # Determine Start Pos (Override > Official > Practice Index)
         start_pos = i + 1
@@ -205,7 +248,8 @@ def run_f1_simulation():
                 session_context={d: fastest_laps.get(d, 90.0) for d in grid_drivers},
                 driver_features=driver_features_map.get(driver, {}),
                 track_characteristics=track_chars,
-                compound_affinity=compound_affinity_map.get(driver, {})
+                compound_affinity=compound_affinity_map.get(driver, {}),
+                ml_correction=ml_corrections.get(driver, 0.0)
             )
             
             # Record time, penalizing DNF heavily
