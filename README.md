@@ -1,152 +1,71 @@
-# 🏁 Formula 1 Race Strategy Predictor
+# 🏁 Formula 1 Race Strategy Predictor & Simulator
 
-**Deep Learning Model for F1 Finishing Position Prediction**
+**A Multi-Model Deep Learning Platform for F1 Finishing Position Prediction & Race Simulation**
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-red)](https://pytorch.org/)
 [![FastF1](https://img.shields.io/badge/FastF1-Latest-green)](https://github.com/theOehrly/Fast-F1)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Ready-FF4B4B)](https://streamlit.io/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
-An advanced LSTM-based neural network that predicts Formula 1 race finishing positions with **97% correlation accuracy** and **sub-1 position error**.
+An advanced deep learning framework and Monte Carlo simulation engine that predicts Formula 1 finishing positions, race times, and pit-stop strategies using actual session telemetry. Features a high-accuracy Ensemble model that blends **LSTM (V4)** and **Transformer (V5)** architectures.
 
 ---
 
-## 🎯 Model Performance
+## 📊 Model Performance
 
-### Global Results (2023-2025 Seasons)
-| Metric | Score | Details |
-|--------|-------|---------|
-| **Pearson Correlation** | **0.9707** | 97% prediction accuracy |
-| **Clean Correlation** | **0.9655** | 96.5% (excluding DNFs) |
-| **Mean Absolute Error** | **0.91 positions** | Average error < 1 position |
-| **Total Predictions** | 982 races | Across 3 complete seasons |
+### Spearman Rank Correlation (2024–2025 Seasons)
+Evaluated on how accurately the models predict the correct order of finishing drivers.
 
-### Per-Season Performance
-- **2024 Season**: 0.99 correlation (near-perfect), 0.6-0.8 MAE
-- **2025 Season**: 0.99 correlation, consistently sub-1.0 MAE
-- **Best Races**: Canadian GP 2024 (0.99 corr, 0.6 MAE), Japanese GP 2025 (1.00 corr, 0.5 MAE)
+| Model / Architecture | 2024 Avg Correlation | 2025 Avg Correlation | Primary Focus |
+| :--- | :---: | :---: | :--- |
+| **Ensemble (70% LSTM / 30% Trans)** | **0.982** | **0.988** | Max accuracy & sequence stability |
+| **LSTM (V4) - Temporal Sequence** | **0.978** | **0.987** | Rolling form & consistency tracking |
+| **Transformer (V5) - Telemetry Enabled** | **0.974** | **0.967** | Driver pace delta & reliability profiling |
+
+### Mean Absolute Error (MAE)
+- **LSTM (V4) Overall MAE**: **0.83 positions** (average error under 1 position)
+- **Transformer (V5) Overall MAE**: **1.09 positions**
 
 ---
 
-## 🧠 Model Architecture
+## 🧠 Multi-Model Architecture
 
-### LSTM Neural Network (V4)
-The model uses a Long Short-Term Memory (LSTM) architecture designed to capture temporal dependencies in racing performance.
+The application hosts three prediction architectures, allowing users to toggle between different methods:
 
+### 1. Ensemble Predictor (Max Accuracy)
+Integrates predictions from the LSTM and Transformer networks:
+- **70% Weight**: LSTM Sequence model (ensures smooth ranking transitions).
+- **30% Weight**: Transformer model (captures pace spikes and reliability deviations).
+
+### 2. LSTM Neural Network (V4)
+Captures chronological form and momentum across sliding 5-race sequence windows:
 ```
-Input Layer (10 Features)
+Input Sequence (5 historical races x 10 features)
     ↓
 LSTM Layer (128 hidden units, 2 layers)
     ↓
-Attention Mechanism (Historical Race Weighting)
+Attention Pooling (time-weighted performance weighting)
     ↓
-Current Race Context (6 Features)
-    ↓
-Fully Connected Layers (32 → 1)
+Dense Layers (32 → 1) + Current Context Injection
     ↓
 Predicted Finishing Position
 ```
 
-### Input Features (10 Total)
-
-#### Historical Sequence Features (Past 5 Races)
-1. **FinishPos** - Previous finishing positions
-2. **GridPos** - Starting grid positions
-3. **Points** - Championship points earned
-4. **SpeedST** - Speed trap velocity
-5. **StintCount** - Number of pit stops
-6. **QualiDelta** - Qualifying vs teammate gap
-7. **PracticePace** - Practice session performance
-8. **IsWet** - Weather conditions (0=dry, 1=wet)
-9. **DriverConsistency** - Rolling std dev of last 5 finishes
-10. **TrackPerformance** - Driver's average finish at this track
-
-#### Current Race Context (6 Features)
-- Grid position (starting position)
-- Qualifying delta (vs teammate)
-- Practice pace differential
-- Weather conditions
-- Driver consistency score
-- Track-specific performance
-
-### Model Training
-- **Loss Function**: Huber Loss (robust to DNF outliers)
-- **Optimizer**: Adam (learning rate: 0.001)
-- **Epochs**: 300
-- **Scheduler**: ReduceLROnPlateau (adaptive learning)
-- **Final Training Loss**: 0.026
+### 3. Transformer Neural Network (V5)
+Applies Multi-Head Attention over sequence context, driver-to-teammate pace differentials, and track-specific history:
+- **Telemetry-Driven**: Leverages practice lap time profiles and qualifying deltas.
+- **Reliability-Aware**: Blends reliability risks (DNF probability) into the sorting weights.
 
 ---
 
-## 📊 Sample Results
+## 🎲 Monte Carlo Simulation Engine
 
-### 2024 Season Highlights
-```
-2024 Canadian GP:        0.99 correlation, 0.6 MAE
-2024 Dutch GP:           0.99 correlation, 0.5 MAE
-2024 Spanish GP:         0.99 correlation, 0.6 MAE
-2024 Hungarian GP:       0.99 correlation, 0.7 MAE
-2024 Emilia Romagna GP:  0.99 correlation, 0.8 MAE
-```
-
-### 2025 Season Highlights
-```
-2025 Japanese GP:        1.00 correlation, 0.5 MAE
-2025 Monaco GP:          0.99 correlation, 0.6 MAE
-2025 Singapore GP:       0.99 correlation, 0.6 MAE
-2025 Canadian GP:        0.99 correlation, 0.6 MAE
-```
-
----
-
-## 🚀 Installation
-
-### Prerequisites
-- Python 3.8+
-- PyTorch 2.0+
-- CUDA (optional, for GPU acceleration)
-
-### Setup
-```bash
-# Clone repository
-git clone https://github.com/fadiz911/Formula-1-Race-Strategy-Predictor.git
-cd Formula-1-Race-Strategy-Predictor
-
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
----
-
-## 💻 Usage
-
-### Streamlit Web App
-Run the interactive web application:
-```bash
-streamlit run app.py
-```
-
-Features:
-- Select any 2023-2025 Grand Prix
-- View predicted finishing positions
-- Compare predictions vs actual results
-- Visualize driver performance trends
-
-### Training the Model
-Retrain with updated data:
-```bash
-python -m src.train_lstm_enhanced
-```
-
-### Benchmarking
-Validate model performance:
-```bash
-python -m src.benchmark_suite
-```
+Simulate full Grand Prix runs on a lap-by-lap basis. The simulator models:
+- **Tire Degradation**: Interactive calibration of SOFT, MEDIUM, and HARD compound degradation curves.
+- **Race Context**: Safety Cars, Virtual Safety Cars, and weather/wet flag conditions.
+- **Form Index**: Dynamic driver form adjustments based on recent results.
+- **Starting Grid Overrides**: Customize starting positions (with automatic support for grid sizes above 20 to handle grid penalties or substitute drivers).
 
 ---
 
@@ -155,73 +74,61 @@ python -m src.benchmark_suite
 ```
 Formula-1-Race-Strategy-Predictor/
 ├── src/
-│   ├── train_lstm_enhanced.py    # Model training pipeline
-│   ├── lstm_model.py              # LSTM architecture
-│   ├── lstm_predictor.py          # Inference engine
-│   └── benchmark_suite.py         # Performance validation
+│   ├── lstm_model.py                # LSTM neural network design
+│   ├── lstm_predictor.py            # LSTM prediction engine
+│   ├── transformer_model.py         # Transformer neural network design
+│   ├── transformer_predictor.py     # Transformer prediction engine
+│   ├── ensemble_predictor.py        # Blended predictor assembly
+│   ├── train_lstm_enhanced.py       # LSTM training routine
+│   ├── train_transformer_enhanced.py# Transformer training routine
+│   ├── strategy_engine.py           # Field pace and delta calculation
+│   ├── optimizer.py                 # Tire strategy optimizer (1-stop vs 2-stop)
+│   ├── simulation.py                # Monte Carlo lap-by-lap simulator
+│   └── feature_engineering.py       # Telemetry and history feature extraction
 ├── models_dl/
-│   ├── lstm_model_v3.pth          # Trained weights
-│   └── lstm_artifacts_v3.pkl      # Scalers & encoders
-├── app.py                         # Streamlit interface
-└── requirements.txt               # Dependencies
+│   ├── lstm_model_v3.pth            # Pre-trained LSTM weights
+│   └── lstm_artifacts_v3.pkl        # Scaler parameters
+├── models_transformer/
+│   ├── transformer_model.pth        # Pre-trained Transformer weights
+│   └── artifacts.pkl                # Scaler parameters
+├── reports/
+│   ├── predictor_comparison_summary.csv # Raw validation stats
+│   └── race_prediction_report.md    # Detailed race breakdown & errors
+├── app.py                           # Premium Streamlit web app
+└── requirements.txt                 # Dependencies
 ```
 
 ---
 
-## 🔬 Technical Details
+## 🚀 Installation & Usage
 
-### Data Pipeline
-1. **Data Source**: FastF1 API (official F1 telemetry)
-2. **Preprocessing**: StandardScaler normalization
-3. **Feature Engineering**: Rolling statistics, track-specific metrics
-4. **Sequence Generation**: 5-race sliding window
+### 1. Clone & Setup
+```bash
+# Clone the repository
+git clone https://github.com/fadiz911/Formula-1-Race-Strategy-Predictor.git
+cd Formula-1-Race-Strategy-Predictor
 
-### Key Innovations
-- **Phase 1**: Huber Loss + LR Scheduling (0.85 → baseline)
-- **Phase 2**: Driver Consistency + Track Performance (0.97 → final)
-- **Outlier Handling**: Robust loss function for crash/DNF scenarios
-- **Temporal Modeling**: LSTM captures momentum and form trends
+# Create and activate environment
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
----
+# Install dependencies
+pip install -r requirements.txt
+```
 
-## 📈 Future Improvements
+### 2. Launch Streamlit Web UI
+```bash
+streamlit run app.py
+```
 
-- [ ] Real-time prediction during live races
-- [ ] Tire strategy optimization
-- [ ] Weather forecast integration
-- [ ] Pit stop timing predictions
-- [ ] Safety car probability modeling
-
----
-
-## 🤝 Contributing
-
-Contributions welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Submit a pull request
+### 3. Evaluate Predictors
+```bash
+python evaluate_all_predictors.py
+python analyze_errors.py
+```
 
 ---
 
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) for details
-
----
-
-## 🙏 Acknowledgments
-
-- **FastF1**: For comprehensive F1 telemetry data
-- **PyTorch**: Deep learning framework
-- **Streamlit**: Interactive web interface
-
----
-
-## 📧 Contact
-
-**Fadi Zoabi**  
-GitHub: [@fadiz911](https://github.com/fadiz911)
-
----
-
-*Developed with ❤️ for Formula 1 and Machine Learning*
+## 📄 License & Contact
+- **License**: MIT License
+- **Author**: Fadi Zoabi ([@fadiz911](https://github.com/fadiz911))
