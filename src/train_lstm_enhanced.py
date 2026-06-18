@@ -159,11 +159,25 @@ def get_enhanced_race_data(years=[2022, 2023, 2024, 2025]):
     )
     
     # Feature 10: Track-Specific Driver Performance (Avg finish at this track)
-    # Hamilton at Silverstone vs Hamilton at Monaco
     track_performance = df.groupby(['Driver', 'Track'])['FinishPos'].transform('mean')
     df['TrackPerformance'] = track_performance.fillna(10.5)  # Midfield default
     
-    print(f"✅ Added DriverConsistency and TrackPerformance features")
+    # Feature 11: Team Average Points (Rolling average of team points over last 5 races, shifted to prevent leakage)
+    team_points = df.groupby(['Year', 'Round', 'Team'])['Points'].sum().reset_index()
+    team_points = team_points.sort_values(['Year', 'Round'])
+    team_points['TeamAvgPoints'] = team_points.groupby('Team')['Points'].transform(
+        lambda x: x.shift(1).rolling(window=5, min_periods=1).mean()
+    )
+    df = df.merge(team_points[['Year', 'Round', 'Team', 'TeamAvgPoints']], on=['Year', 'Round', 'Team'], how='left')
+    df['TeamAvgPoints'] = df['TeamAvgPoints'].fillna(5.0) # Midfield default
+    
+    # Feature 12: Rolling DNF Rate (last 5 races, shifted to prevent leakage)
+    df['IsDNF'] = df['FinishPos'].apply(lambda x: 1.0 if x >= 20.0 or pd.isna(x) else 0.0)
+    df['ReliabilityRisk'] = df.groupby('Driver')['IsDNF'].transform(
+        lambda x: x.shift(1).rolling(window=5, min_periods=1).mean().fillna(0.1)
+    )
+    
+    print(f"✅ Added DriverConsistency, TrackPerformance, TeamAvgPoints, and ReliabilityRisk features")
     
     return df
 
@@ -171,7 +185,7 @@ def train_lstm():
     print("🚀 Starting Enhanced LSTM Training...")
     
     # 1. Load Data
-    df = get_enhanced_race_data(years=[2022, 2023, 2024, 2025])
+    df = get_enhanced_race_data(years=[2022, 2023, 2024, 2025, 2026])
     if df.empty: return
     
     df = df.sort_values(['Year', 'Round'])
@@ -200,12 +214,10 @@ def train_lstm():
     df['DriverConsistency'] = df['DriverConsistency'].replace([np.inf, -np.inf], 5.0).fillna(5.0)
     df['TrackPerformance'] = df['TrackPerformance'].replace([np.inf, -np.inf], 10.5).fillna(10.5)
     
-    # Scale Numerical Features
-    # Recalibrate scaler for Phase 2 (10 features)
-    # Input Features: [FinishPos, GridPos, Points, SpeedST, StintCount, QualiDelta, PracticePace, IsWet, DriverConsistency, TrackPerformance]
+    # Scale Numerical Features (12 features)
     scaler = StandardScaler()
     feature_cols = ['FinishPos', 'GridPos', 'Points', 'SpeedST', 'StintCount', 
-                    'QualiDelta', 'PracticePace', 'IsWet', 'DriverConsistency', 'TrackPerformance']
+                    'QualiDelta', 'PracticePace', 'IsWet', 'DriverConsistency', 'TrackPerformance', 'TeamAvgPoints', 'ReliabilityRisk']
     df[feature_cols] = scaler.fit_transform(df[feature_cols])
     
     # Save Artifacts
@@ -234,13 +246,12 @@ def train_lstm():
         d_df = df[df['Driver'] == driver]
         if len(d_df) < SEQ_LEN + 1: continue
         
-        # Values - NOW 10 features
         feat_vals = d_df[feature_cols].values
         team_vals = d_df['TeamId'].values
         track_vals = d_df['TrackId'].values
         
         for i in range(len(d_df) - SEQ_LEN):
-            # Input: T_0 to T_4 (All 10 features)
+            # Input: T_0 to T_4 (All 12 features)
             seq_x = feat_vals[i : i+SEQ_LEN]
             seq_team = team_vals[i : i+SEQ_LEN]
             seq_track = track_vals[i : i+SEQ_LEN]
@@ -249,15 +260,17 @@ def train_lstm():
             target_idx = i + SEQ_LEN
             target_y = feat_vals[target_idx][0] # FinishPos (Scaled)
             
-            # Current Race Inputs (Pre-race knowns) - Phase 2: 6 features
-            # Feature Indices: [FinishPos=0, GridPos=1, Points=2, SpeedST=3, StintCount=4, 
-            #                   QualiDelta=5, PracticePace=6, IsWet=7, DriverConsistency=8, TrackPerformance=9]
+            # Current Race Inputs (Pre-race knowns) - 8 features
             curr_grid = feat_vals[target_idx][1] # GridPos
             curr_quali = feat_vals[target_idx][5] # QualiDelta
             curr_pace = feat_vals[target_idx][6] # PracticePace
             curr_wet = feat_vals[target_idx][7] # IsWet
-            curr_consistency = feat_vals[target_idx][8] # NEW: DriverConsistency
-            curr_track_perf = feat_vals[target_idx][9] # NEW: TrackPerformance
+            curr_consistency = feat_vals[target_idx][8] # DriverConsistency
+            curr_track_perf = feat_vals[target_idx][9] # TrackPerformance
+            curr_team_avg = feat_vals[target_idx][10] # TeamAvgPoints
+            curr_reliability = feat_vals[target_idx][11] # ReliabilityRisk
+            
+            curr_feat = [curr_grid, curr_quali, curr_pace, curr_wet, curr_consistency, curr_track_perf, curr_team_avg, curr_reliability]
             
             curr_team = team_vals[target_idx]
             curr_track = track_vals[target_idx]
@@ -266,7 +279,7 @@ def train_lstm():
             hist_team_seq.append(seq_team)
             hist_track_seq.append(seq_track)
             
-            curr_feat_seq.append([curr_grid, curr_quali, curr_pace, curr_wet, curr_consistency, curr_track_perf])
+            curr_feat_seq.append(curr_feat)
             curr_team_seq.append(curr_team)
             curr_track_seq.append(curr_track)
             

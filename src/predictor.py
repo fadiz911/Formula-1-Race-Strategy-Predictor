@@ -164,10 +164,10 @@ def get_driver_recent_form(driver, year, current_round, lookback=5):
     
     start_round = max(1, current_round - lookback)
     
+    from src.feature_engineering import get_and_load_race_session
     for i, r in enumerate(range(start_round, current_round)):
         try:
-            session = fastf1.get_session(year, r, 'R')
-            session.load(laps=True, telemetry=False, weather=False, messages=False)
+            session = get_and_load_race_session(year, r)
             
             clean = session.laps.pick_quicklaps()
             if clean.empty: continue

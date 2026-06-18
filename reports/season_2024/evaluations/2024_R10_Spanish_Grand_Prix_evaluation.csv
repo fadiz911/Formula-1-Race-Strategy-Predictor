@@ -1,0 +1,17 @@
+Year,Round,Race,Driver,Start,Actual,Predicted,Misplacement,AbsMisplacement
+2024,10,Spanish Grand Prix,VER,2,1,1,0,0
+2024,10,Spanish Grand Prix,NOR,1,2,2,0,0
+2024,10,Spanish Grand Prix,RUS,4,4,3,-1,1
+2024,10,Spanish Grand Prix,HAM,3,3,4,1,1
+2024,10,Spanish Grand Prix,PIA,9,7,5,-2,2
+2024,10,Spanish Grand Prix,SAI,6,6,6,0,0
+2024,10,Spanish Grand Prix,LEC,5,5,7,2,2
+2024,10,Spanish Grand Prix,PER,11,8,8,0,0
+2024,10,Spanish Grand Prix,ALO,10,12,9,-3,3
+2024,10,Spanish Grand Prix,STR,14,14,10,-4,4
+2024,10,Spanish Grand Prix,MAG,16,17,11,-6,6
+2024,10,Spanish Grand Prix,BOT,12,16,12,-4,4
+2024,10,Spanish Grand Prix,OCO,8,10,13,3,3
+2024,10,Spanish Grand Prix,ZHO,15,13,14,1,1
+2024,10,Spanish Grand Prix,GAS,7,9,15,6,6
+2024,10,Spanish Grand Prix,HUL,13,11,16,5,5

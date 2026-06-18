@@ -1,0 +1,17 @@
+Year,Round,Race,Driver,Start,Actual,Predicted,Misplacement,AbsMisplacement
+2024,13,Hungarian Grand Prix,NOR,1,2,1,-1,1
+2024,13,Hungarian Grand Prix,VER,3,5,2,-3,3
+2024,13,Hungarian Grand Prix,SAI,4,6,3,-3,3
+2024,13,Hungarian Grand Prix,HAM,5,3,4,1,1
+2024,13,Hungarian Grand Prix,LEC,6,4,5,1,1
+2024,13,Hungarian Grand Prix,PIA,2,1,6,5,5
+2024,13,Hungarian Grand Prix,PER,16,7,7,0,0
+2024,13,Hungarian Grand Prix,TSU,10,9,8,-1,1
+2024,13,Hungarian Grand Prix,ALO,7,11,9,-2,2
+2024,13,Hungarian Grand Prix,STR,8,10,10,0,0
+2024,13,Hungarian Grand Prix,ALB,13,14,11,-3,3
+2024,13,Hungarian Grand Prix,RIC,9,12,12,0,0
+2024,13,Hungarian Grand Prix,BOT,12,16,13,-3,3
+2024,13,Hungarian Grand Prix,SAR,14,17,14,-3,3
+2024,13,Hungarian Grand Prix,MAG,15,15,15,0,0
+2024,13,Hungarian Grand Prix,HUL,11,13,16,3,3

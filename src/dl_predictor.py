@@ -94,7 +94,7 @@ class DLPredictor:
             # logger.warning(f"DL Inferences failed: {e}")
             return None
 
-    def get_correction_factor(self, driver, grid_pos, team, track, year, round_num, rolling_points, sim_rank):
+    def get_correction_factor(self, driver, grid_pos, team, track, year, round_num, rolling_points, sim_rank, track_lap_time=80.0):
         pred = self.predict_position(grid_pos, team, track, year, round_num, rolling_points)
         if pred is None: return 0.0
         
@@ -104,6 +104,7 @@ class DLPredictor:
         # If Sim is P10 (slower) and ML is P5 (faster), we need to SUBTRACT time.
         
         pos_delta = pred - sim_rank
-        # Heuristic: 1 pos = 2.5s
-        correction = pos_delta * 2.5
-        return np.clip(correction, -25.0, 25.0)
+        # Dynamic scaling: 1 position delta ~ 5% of track lap time (e.g. 4.0s on an 80s lap)
+        scale = track_lap_time * 0.05
+        correction = pos_delta * scale
+        return np.clip(correction, -scale * 10, scale * 10)

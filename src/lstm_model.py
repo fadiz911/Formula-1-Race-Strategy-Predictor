@@ -13,15 +13,14 @@ class DriverLSTM(nn.Module):
         self.team_embedding = nn.Embedding(num_teams, embedding_dim)
         self.track_embedding = nn.Embedding(num_tracks, embedding_dim)
         
-        # Feature sizes - Phase 2 Update
-        # Sequence Features: [FinishPos, GridPos, Points, SpeedST, StintCount, QualiDelta, PracticePace, IsWet, DriverConsistency, TrackPerformance]
-        self.seq_input_dim = 10 + (embedding_dim * 2)  # Was 8
+        # Sequence Features: [FinishPos, GridPos, Points, SpeedST, StintCount, QualiDelta, PracticePace, IsWet, DriverConsistency, TrackPerformance, TeamAvgPoints, ReliabilityRisk]
+        self.seq_input_dim = 12 + (embedding_dim * 2)
         
         # LSTM Layer
         self.lstm = nn.LSTM(self.seq_input_dim, hidden_dim, num_layers, batch_first=True)
         
-        # Current Race Features: [GridPos, QualiDelta, PracticePace, IsWet, DriverConsistency, TrackPerformance] + Embeddings
-        self.current_feature_dim = 6 + (embedding_dim * 2)  # Was 4
+        # Current Race Features: [GridPos, QualiDelta, PracticePace, IsWet, DriverConsistency, TrackPerformance, TeamAvgPoints, ReliabilityRisk] + Embeddings
+        self.current_feature_dim = 8 + (embedding_dim * 2)
         
         # Combined Head
         self.fc1 = nn.Linear(hidden_dim + self.current_feature_dim, 32)

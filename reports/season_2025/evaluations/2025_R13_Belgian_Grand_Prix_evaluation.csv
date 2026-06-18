@@ -1,0 +1,17 @@
+Year,Round,Race,Driver,Start,Actual,Predicted,Misplacement,AbsMisplacement
+2025,13,Belgian Grand Prix,NOR,1,2,1,-1,1
+2025,13,Belgian Grand Prix,PIA,2,1,2,1,1
+2025,13,Belgian Grand Prix,VER,4,4,3,-1,1
+2025,13,Belgian Grand Prix,LEC,3,3,4,1,1
+2025,13,Belgian Grand Prix,RUS,6,5,5,0,0
+2025,13,Belgian Grand Prix,STR,16,14,6,-8,8
+2025,13,Belgian Grand Prix,HAD,8,20,7,-13,13
+2025,13,Belgian Grand Prix,OCO,11,15,8,-7,7
+2025,13,Belgian Grand Prix,ALB,5,6,9,3,3
+2025,13,Belgian Grand Prix,TSU,7,13,10,-3,3
+2025,13,Belgian Grand Prix,HUL,14,12,11,-1,1
+2025,13,Belgian Grand Prix,GAS,13,10,12,2,2
+2025,13,Belgian Grand Prix,LAW,9,8,13,5,5
+2025,13,Belgian Grand Prix,BOR,10,9,14,5,5
+2025,13,Belgian Grand Prix,BEA,12,11,15,4,4
+2025,13,Belgian Grand Prix,COL,15,19,16,-3,3

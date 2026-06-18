@@ -1,0 +1,385 @@
+Year,Round,Race,Driver,Start,Actual,Predicted,Misplacement,AbsMisplacement
+2024,1,Bahrain Grand Prix,HAM,9,7,1,-6,6
+2024,1,Bahrain Grand Prix,RUS,3,5,2,-3,3
+2024,1,Bahrain Grand Prix,TSU,11,14,3,-11,11
+2024,1,Bahrain Grand Prix,SAI,4,3,4,1,1
+2024,1,Bahrain Grand Prix,NOR,7,6,5,-1,1
+2024,1,Bahrain Grand Prix,ALO,6,9,6,-3,3
+2024,1,Bahrain Grand Prix,PER,5,2,7,5,5
+2024,1,Bahrain Grand Prix,ALB,13,15,8,-7,7
+2024,1,Bahrain Grand Prix,LEC,2,4,9,5,5
+2024,1,Bahrain Grand Prix,RIC,14,13,10,-3,3
+2024,1,Bahrain Grand Prix,BOT,16,19,11,-8,8
+2024,1,Bahrain Grand Prix,PIA,8,8,12,4,4
+2024,1,Bahrain Grand Prix,VER,1,1,13,12,12
+2024,1,Bahrain Grand Prix,STR,12,10,14,4,4
+2024,1,Bahrain Grand Prix,HUL,10,16,15,-1,1
+2024,1,Bahrain Grand Prix,MAG,15,12,16,4,4
+2024,2,Saudi Arabian Grand Prix,VER,1,1,1,0,0
+2024,2,Saudi Arabian Grand Prix,PER,3,2,2,0,0
+2024,2,Saudi Arabian Grand Prix,STR,10,20,3,-17,17
+2024,2,Saudi Arabian Grand Prix,RUS,7,6,4,-2,2
+2024,2,Saudi Arabian Grand Prix,ALO,4,5,5,0,0
+2024,2,Saudi Arabian Grand Prix,HAM,8,9,6,-3,3
+2024,2,Saudi Arabian Grand Prix,HUL,15,10,7,-3,3
+2024,2,Saudi Arabian Grand Prix,PIA,5,4,8,4,4
+2024,2,Saudi Arabian Grand Prix,RIC,14,16,9,-7,7
+2024,2,Saudi Arabian Grand Prix,NOR,6,8,10,2,2
+2024,2,Saudi Arabian Grand Prix,BOT,16,17,11,-6,6
+2024,2,Saudi Arabian Grand Prix,BEA,11,7,12,5,5
+2024,2,Saudi Arabian Grand Prix,LEC,2,3,13,10,10
+2024,2,Saudi Arabian Grand Prix,ALB,12,11,14,3,3
+2024,2,Saudi Arabian Grand Prix,MAG,13,12,15,3,3
+2024,2,Saudi Arabian Grand Prix,TSU,9,15,16,1,1
+2024,3,Australian Grand Prix,NOR,3,3,1,-2,2
+2024,3,Australian Grand Prix,RUS,7,17,2,-15,15
+2024,3,Australian Grand Prix,HUL,16,9,3,-6,6
+2024,3,Australian Grand Prix,VER,1,20,4,-16,16
+2024,3,Australian Grand Prix,SAI,2,1,5,4,4
+2024,3,Australian Grand Prix,LEC,4,2,6,4,4
+2024,3,Australian Grand Prix,ALB,12,11,7,-4,4
+2024,3,Australian Grand Prix,HAM,11,20,8,-12,12
+2024,3,Australian Grand Prix,STR,9,6,9,3,3
+2024,3,Australian Grand Prix,OCO,15,16,10,-6,6
+2024,3,Australian Grand Prix,PIA,5,4,11,7,7
+2024,3,Australian Grand Prix,ALO,10,8,12,4,4
+2024,3,Australian Grand Prix,PER,6,5,13,8,8
+2024,3,Australian Grand Prix,MAG,14,10,14,4,4
+2024,3,Australian Grand Prix,BOT,13,14,15,1,1
+2024,3,Australian Grand Prix,TSU,8,7,16,9,9
+2024,4,Japanese Grand Prix,RUS,9,7,1,-6,6
+2024,4,Japanese Grand Prix,PER,2,2,2,0,0
+2024,4,Japanese Grand Prix,PIA,6,8,3,-5,5
+2024,4,Japanese Grand Prix,VER,1,1,4,3,3
+2024,4,Japanese Grand Prix,LEC,8,4,5,1,1
+2024,4,Japanese Grand Prix,SAI,4,3,6,3,3
+2024,4,Japanese Grand Prix,STR,16,12,7,-5,5
+2024,4,Japanese Grand Prix,TSU,10,10,8,-2,2
+2024,4,Japanese Grand Prix,HAM,7,9,9,0,0
+2024,4,Japanese Grand Prix,ALB,14,20,10,-10,10
+2024,4,Japanese Grand Prix,BOT,13,14,11,-3,3
+2024,4,Japanese Grand Prix,HUL,12,11,12,1,1
+2024,4,Japanese Grand Prix,ALO,5,6,13,7,7
+2024,4,Japanese Grand Prix,RIC,11,20,14,-6,6
+2024,4,Japanese Grand Prix,NOR,3,5,15,10,10
+2024,4,Japanese Grand Prix,OCO,15,15,16,1,1
+2024,5,Chinese Grand Prix,VER,1,1,1,0,0
+2024,5,Chinese Grand Prix,HUL,9,10,2,-8,8
+2024,5,Chinese Grand Prix,PER,2,3,3,0,0
+2024,5,Chinese Grand Prix,PIA,5,8,4,-4,4
+2024,5,Chinese Grand Prix,NOR,4,2,5,3,3
+2024,5,Chinese Grand Prix,LEC,6,4,6,2,2
+2024,5,Chinese Grand Prix,RIC,12,20,7,-13,13
+2024,5,Chinese Grand Prix,SAI,7,5,8,3,3
+2024,5,Chinese Grand Prix,STR,11,15,9,-6,6
+2024,5,Chinese Grand Prix,BOT,10,20,10,-10,10
+2024,5,Chinese Grand Prix,RUS,8,6,11,5,5
+2024,5,Chinese Grand Prix,ALO,3,7,12,5,5
+2024,5,Chinese Grand Prix,ZHO,16,14,13,-1,1
+2024,5,Chinese Grand Prix,GAS,15,13,14,1,1
+2024,5,Chinese Grand Prix,OCO,13,11,15,4,4
+2024,5,Chinese Grand Prix,ALB,14,12,16,4,4
+2024,6,Miami Grand Prix,HUL,9,11,1,-10,10
+2024,6,Miami Grand Prix,VER,1,2,2,0,0
+2024,6,Miami Grand Prix,PER,4,4,3,-1,1
+2024,6,Miami Grand Prix,PIA,6,13,4,-9,9
+2024,6,Miami Grand Prix,SAI,3,5,5,0,0
+2024,6,Miami Grand Prix,OCO,13,10,6,-4,4
+2024,6,Miami Grand Prix,HAM,8,6,7,1,1
+2024,6,Miami Grand Prix,STR,11,17,8,-9,9
+2024,6,Miami Grand Prix,RUS,7,8,9,1,1
+2024,6,Miami Grand Prix,NOR,5,1,10,9,9
+2024,6,Miami Grand Prix,ALB,14,18,11,-7,7
+2024,6,Miami Grand Prix,GAS,12,12,12,0,0
+2024,6,Miami Grand Prix,TSU,10,7,13,6,6
+2024,6,Miami Grand Prix,ALO,15,9,14,5,5
+2024,6,Miami Grand Prix,BOT,16,16,15,-1,1
+2024,6,Miami Grand Prix,LEC,2,3,16,13,13
+2024,7,Emilia Romagna Grand Prix,SAI,4,5,1,-4,4
+2024,7,Emilia Romagna Grand Prix,PIA,5,4,2,-2,2
+2024,7,Emilia Romagna Grand Prix,LEC,3,3,3,0,0
+2024,7,Emilia Romagna Grand Prix,VER,1,1,4,3,3
+2024,7,Emilia Romagna Grand Prix,PER,11,8,5,-3,3
+2024,7,Emilia Romagna Grand Prix,GAS,15,16,6,-10,10
+2024,7,Emilia Romagna Grand Prix,RUS,6,7,7,0,0
+2024,7,Emilia Romagna Grand Prix,HAM,8,6,8,2,2
+2024,7,Emilia Romagna Grand Prix,NOR,2,2,9,7,7
+2024,7,Emilia Romagna Grand Prix,STR,13,9,10,1,1
+2024,7,Emilia Romagna Grand Prix,RIC,9,13,11,-2,2
+2024,7,Emilia Romagna Grand Prix,BOT,16,18,12,-6,6
+2024,7,Emilia Romagna Grand Prix,TSU,7,10,13,3,3
+2024,7,Emilia Romagna Grand Prix,ALB,14,20,14,-6,6
+2024,7,Emilia Romagna Grand Prix,OCO,12,14,15,1,1
+2024,7,Emilia Romagna Grand Prix,HUL,10,11,16,5,5
+2024,8,Monaco Grand Prix,PIA,2,2,1,-1,1
+2024,8,Monaco Grand Prix,LEC,1,1,2,1,1
+2024,8,Monaco Grand Prix,RUS,5,5,3,-2,2
+2024,8,Monaco Grand Prix,HAM,7,7,4,-3,3
+2024,8,Monaco Grand Prix,PER,16,20,5,-15,15
+2024,8,Monaco Grand Prix,SAI,3,3,6,3,3
+2024,8,Monaco Grand Prix,NOR,4,4,7,3,3
+2024,8,Monaco Grand Prix,ALO,14,11,8,-3,3
+2024,8,Monaco Grand Prix,VER,6,6,9,3,3
+2024,8,Monaco Grand Prix,STR,13,14,10,-4,4
+2024,8,Monaco Grand Prix,TSU,8,8,11,3,3
+2024,8,Monaco Grand Prix,GAS,10,10,12,2,2
+2024,8,Monaco Grand Prix,ALB,9,9,13,4,4
+2024,8,Monaco Grand Prix,SAR,15,15,14,-1,1
+2024,8,Monaco Grand Prix,RIC,12,12,15,3,3
+2024,8,Monaco Grand Prix,OCO,11,20,16,-4,4
+2024,9,Canadian Grand Prix,LEC,11,20,1,-19,19
+2024,9,Canadian Grand Prix,NOR,3,2,2,0,0
+2024,9,Canadian Grand Prix,SAI,12,20,3,-17,17
+2024,9,Canadian Grand Prix,MAG,14,12,4,-8,8
+2024,9,Canadian Grand Prix,ALO,6,6,5,-1,1
+2024,9,Canadian Grand Prix,PIA,4,5,6,1,1
+2024,9,Canadian Grand Prix,PER,16,20,7,-13,13
+2024,9,Canadian Grand Prix,VER,2,1,8,7,7
+2024,9,Canadian Grand Prix,HAM,7,4,9,5,5
+2024,9,Canadian Grand Prix,GAS,15,9,10,1,1
+2024,9,Canadian Grand Prix,RUS,1,3,11,8,8
+2024,9,Canadian Grand Prix,STR,9,7,12,5,5
+2024,9,Canadian Grand Prix,RIC,5,8,13,5,5
+2024,9,Canadian Grand Prix,ALB,10,20,14,-6,6
+2024,9,Canadian Grand Prix,TSU,8,14,15,1,1
+2024,9,Canadian Grand Prix,SAR,13,20,16,-4,4
+2024,10,Spanish Grand Prix,VER,2,1,1,0,0
+2024,10,Spanish Grand Prix,NOR,1,2,2,0,0
+2024,10,Spanish Grand Prix,RUS,4,4,3,-1,1
+2024,10,Spanish Grand Prix,HAM,3,3,4,1,1
+2024,10,Spanish Grand Prix,PIA,9,7,5,-2,2
+2024,10,Spanish Grand Prix,SAI,6,6,6,0,0
+2024,10,Spanish Grand Prix,LEC,5,5,7,2,2
+2024,10,Spanish Grand Prix,PER,11,8,8,0,0
+2024,10,Spanish Grand Prix,ALO,10,12,9,-3,3
+2024,10,Spanish Grand Prix,STR,14,14,10,-4,4
+2024,10,Spanish Grand Prix,MAG,16,17,11,-6,6
+2024,10,Spanish Grand Prix,BOT,12,16,12,-4,4
+2024,10,Spanish Grand Prix,OCO,8,10,13,3,3
+2024,10,Spanish Grand Prix,ZHO,15,13,14,1,1
+2024,10,Spanish Grand Prix,GAS,7,9,15,6,6
+2024,10,Spanish Grand Prix,HUL,13,11,16,5,5
+2024,11,Austrian Grand Prix,PIA,7,2,1,-1,1
+2024,11,Austrian Grand Prix,VER,1,5,2,-3,3
+2024,11,Austrian Grand Prix,LEC,6,11,3,-8,8
+2024,11,Austrian Grand Prix,SAI,4,3,4,1,1
+2024,11,Austrian Grand Prix,HAM,5,4,5,1,1
+2024,11,Austrian Grand Prix,RUS,3,1,6,5,5
+2024,11,Austrian Grand Prix,NOR,2,20,7,-13,13
+2024,11,Austrian Grand Prix,PER,8,7,8,1,1
+2024,11,Austrian Grand Prix,OCO,10,12,9,-3,3
+2024,11,Austrian Grand Prix,ALB,16,15,10,-5,5
+2024,11,Austrian Grand Prix,TSU,14,14,11,-3,3
+2024,11,Austrian Grand Prix,GAS,13,10,12,2,2
+2024,11,Austrian Grand Prix,HUL,9,6,13,7,7
+2024,11,Austrian Grand Prix,RIC,11,9,14,5,5
+2024,11,Austrian Grand Prix,MAG,12,8,15,7,7
+2024,11,Austrian Grand Prix,ALO,15,18,16,-2,2
+2024,12,British Grand Prix,NOR,3,3,1,-2,2
+2024,12,British Grand Prix,SAI,7,5,2,-3,3
+2024,12,British Grand Prix,RUS,1,20,3,-17,17
+2024,12,British Grand Prix,HAM,2,1,4,3,3
+2024,12,British Grand Prix,PIA,5,4,5,1,1
+2024,12,British Grand Prix,LEC,11,14,6,-8,8
+2024,12,British Grand Prix,VER,4,2,7,5,5
+2024,12,British Grand Prix,BOT,16,15,8,-7,7
+2024,12,British Grand Prix,STR,8,7,9,2,2
+2024,12,British Grand Prix,SAR,12,11,10,-1,1
+2024,12,British Grand Prix,ALO,10,8,11,3,3
+2024,12,British Grand Prix,HUL,6,6,12,6,6
+2024,12,British Grand Prix,TSU,13,10,13,3,3
+2024,12,British Grand Prix,RIC,15,13,14,1,1
+2024,12,British Grand Prix,ZHO,14,18,15,-3,3
+2024,12,British Grand Prix,ALB,9,9,16,7,7
+2024,13,Hungarian Grand Prix,NOR,1,2,1,-1,1
+2024,13,Hungarian Grand Prix,VER,3,5,2,-3,3
+2024,13,Hungarian Grand Prix,SAI,4,6,3,-3,3
+2024,13,Hungarian Grand Prix,HAM,5,3,4,1,1
+2024,13,Hungarian Grand Prix,LEC,6,4,5,1,1
+2024,13,Hungarian Grand Prix,PIA,2,1,6,5,5
+2024,13,Hungarian Grand Prix,PER,16,7,7,0,0
+2024,13,Hungarian Grand Prix,TSU,10,9,8,-1,1
+2024,13,Hungarian Grand Prix,ALO,7,11,9,-2,2
+2024,13,Hungarian Grand Prix,STR,8,10,10,0,0
+2024,13,Hungarian Grand Prix,ALB,13,14,11,-3,3
+2024,13,Hungarian Grand Prix,RIC,9,12,12,0,0
+2024,13,Hungarian Grand Prix,BOT,12,16,13,-3,3
+2024,13,Hungarian Grand Prix,SAR,14,17,14,-3,3
+2024,13,Hungarian Grand Prix,MAG,15,15,15,0,0
+2024,13,Hungarian Grand Prix,HUL,11,13,16,3,3
+2024,14,Belgian Grand Prix,VER,11,4,1,-3,3
+2024,14,Belgian Grand Prix,PIA,5,2,2,0,0
+2024,14,Belgian Grand Prix,NOR,4,5,3,-2,2
+2024,14,Belgian Grand Prix,LEC,1,3,4,1,1
+2024,14,Belgian Grand Prix,RUS,6,20,5,-15,15
+2024,14,Belgian Grand Prix,HAM,3,1,6,5,5
+2024,14,Belgian Grand Prix,PER,2,7,7,0,0
+2024,14,Belgian Grand Prix,SAI,7,6,8,2,2
+2024,14,Belgian Grand Prix,GAS,12,13,9,-4,4
+2024,14,Belgian Grand Prix,ALB,10,12,10,-2,2
+2024,14,Belgian Grand Prix,STR,15,11,11,0,0
+2024,14,Belgian Grand Prix,ALO,8,8,12,4,4
+2024,14,Belgian Grand Prix,RIC,13,10,13,3,3
+2024,14,Belgian Grand Prix,BOT,14,15,14,-1,1
+2024,14,Belgian Grand Prix,HUL,16,18,15,-3,3
+2024,14,Belgian Grand Prix,OCO,9,9,16,7,7
+2024,15,Dutch Grand Prix,RUS,4,7,1,-6,6
+2024,15,Dutch Grand Prix,VER,2,2,2,0,0
+2024,15,Dutch Grand Prix,PIA,3,4,3,-1,1
+2024,15,Dutch Grand Prix,GAS,9,9,4,-5,5
+2024,15,Dutch Grand Prix,NOR,1,1,5,4,4
+2024,15,Dutch Grand Prix,SAI,10,5,6,1,1
+2024,15,Dutch Grand Prix,BOT,16,19,7,-12,12
+2024,15,Dutch Grand Prix,HAM,14,8,8,0,0
+2024,15,Dutch Grand Prix,PER,5,6,9,3,3
+2024,15,Dutch Grand Prix,ALO,7,10,10,0,0
+2024,15,Dutch Grand Prix,OCO,15,15,11,-4,4
+2024,15,Dutch Grand Prix,RIC,13,12,12,0,0
+2024,15,Dutch Grand Prix,LEC,6,3,13,10,10
+2024,15,Dutch Grand Prix,TSU,11,17,14,-3,3
+2024,15,Dutch Grand Prix,HUL,12,11,15,4,4
+2024,15,Dutch Grand Prix,STR,8,13,16,3,3
+2024,16,Italian Grand Prix,RUS,3,7,1,-6,6
+2024,16,Italian Grand Prix,LEC,4,1,2,1,1
+2024,16,Italian Grand Prix,NOR,1,3,3,0,0
+2024,16,Italian Grand Prix,SAI,5,4,4,0,0
+2024,16,Italian Grand Prix,HAM,6,5,5,0,0
+2024,16,Italian Grand Prix,PIA,2,2,6,4,4
+2024,16,Italian Grand Prix,RIC,12,13,7,-6,6
+2024,16,Italian Grand Prix,VER,7,6,8,2,2
+2024,16,Italian Grand Prix,MAG,13,10,9,-1,1
+2024,16,Italian Grand Prix,HUL,10,17,10,-7,7
+2024,16,Italian Grand Prix,ALB,9,9,11,2,2
+2024,16,Italian Grand Prix,TSU,16,20,12,-8,8
+2024,16,Italian Grand Prix,ALO,11,11,13,2,2
+2024,16,Italian Grand Prix,PER,8,8,14,6,6
+2024,16,Italian Grand Prix,GAS,14,15,15,0,0
+2024,16,Italian Grand Prix,OCO,15,14,16,2,2
+2024,17,Azerbaijan Grand Prix,VER,6,5,1,-4,4
+2024,17,Azerbaijan Grand Prix,LEC,1,2,2,0,0
+2024,17,Azerbaijan Grand Prix,HUL,12,11,3,-8,8
+2024,17,Azerbaijan Grand Prix,PIA,2,1,4,3,3
+2024,17,Azerbaijan Grand Prix,NOR,15,4,5,1,1
+2024,17,Azerbaijan Grand Prix,PER,4,17,6,-11,11
+2024,17,Azerbaijan Grand Prix,RUS,5,3,7,4,4
+2024,17,Azerbaijan Grand Prix,ALO,7,6,8,2,2
+2024,17,Azerbaijan Grand Prix,STR,13,19,9,-10,10
+2024,17,Azerbaijan Grand Prix,ALB,9,7,10,3,3
+2024,17,Azerbaijan Grand Prix,COL,8,8,11,3,3
+2024,17,Azerbaijan Grand Prix,SAI,3,18,12,-6,6
+2024,17,Azerbaijan Grand Prix,BEA,10,10,13,3,3
+2024,17,Azerbaijan Grand Prix,TSU,11,20,14,-6,6
+2024,17,Azerbaijan Grand Prix,RIC,14,13,15,2,2
+2024,17,Azerbaijan Grand Prix,BOT,16,16,16,0,0
+2024,18,Singapore Grand Prix,PER,13,10,1,-9,9
+2024,18,Singapore Grand Prix,NOR,1,1,2,1,1
+2024,18,Singapore Grand Prix,SAI,10,7,3,-4,4
+2024,18,Singapore Grand Prix,VER,2,2,4,2,2
+2024,18,Singapore Grand Prix,PIA,5,3,5,2,2
+2024,18,Singapore Grand Prix,LEC,9,5,6,1,1
+2024,18,Singapore Grand Prix,HAM,3,6,7,1,1
+2024,18,Singapore Grand Prix,RUS,4,4,8,4,4
+2024,18,Singapore Grand Prix,ALB,11,20,9,-11,11
+2024,18,Singapore Grand Prix,OCO,15,13,10,-3,3
+2024,18,Singapore Grand Prix,ALO,7,8,11,3,3
+2024,18,Singapore Grand Prix,RIC,16,18,12,-6,6
+2024,18,Singapore Grand Prix,COL,12,11,13,2,2
+2024,18,Singapore Grand Prix,HUL,6,9,14,5,5
+2024,18,Singapore Grand Prix,TSU,8,12,15,3,3
+2024,18,Singapore Grand Prix,MAG,14,19,16,-3,3
+2024,19,United States Grand Prix,NOR,1,4,1,-3,3
+2024,19,United States Grand Prix,TSU,10,14,2,-12,12
+2024,19,United States Grand Prix,LEC,4,1,3,2,2
+2024,19,United States Grand Prix,SAI,3,2,4,2,2
+2024,19,United States Grand Prix,PER,9,7,5,-2,2
+2024,19,United States Grand Prix,STR,13,15,6,-9,9
+2024,19,United States Grand Prix,GAS,6,12,7,-5,5
+2024,19,United States Grand Prix,VER,2,3,8,5,5
+2024,19,United States Grand Prix,MAG,8,11,9,-2,2
+2024,19,United States Grand Prix,PIA,5,5,10,5,5
+2024,19,United States Grand Prix,HUL,11,8,11,3,3
+2024,19,United States Grand Prix,BOT,16,17,12,-5,5
+2024,19,United States Grand Prix,OCO,12,18,13,-5,5
+2024,19,United States Grand Prix,ALB,14,16,14,-2,2
+2024,19,United States Grand Prix,ALO,7,13,15,2,2
+2024,19,United States Grand Prix,COL,15,10,16,6,6
+2024,20,Mexico City Grand Prix,LEC,4,3,1,-2,2
+2024,20,Mexico City Grand Prix,SAI,1,1,2,1,1
+2024,20,Mexico City Grand Prix,TSU,11,20,3,-17,17
+2024,20,Mexico City Grand Prix,NOR,3,2,4,2,2
+2024,20,Mexico City Grand Prix,ALO,13,20,5,-15,15
+2024,20,Mexico City Grand Prix,HAM,6,4,6,2,2
+2024,20,Mexico City Grand Prix,MAG,7,7,7,0,0
+2024,20,Mexico City Grand Prix,RUS,5,5,8,3,3
+2024,20,Mexico City Grand Prix,VER,2,6,9,3,3
+2024,20,Mexico City Grand Prix,BOT,15,14,10,-4,4
+2024,20,Mexico City Grand Prix,LAW,12,16,11,-5,5
+2024,20,Mexico City Grand Prix,HUL,10,9,12,3,3
+2024,20,Mexico City Grand Prix,GAS,8,10,13,3,3
+2024,20,Mexico City Grand Prix,COL,16,12,14,2,2
+2024,20,Mexico City Grand Prix,STR,14,11,15,4,4
+2024,20,Mexico City Grand Prix,ALB,9,20,16,-4,4
+2024,21,São Paulo Grand Prix,NOR,1,6,1,-5,5
+2024,21,São Paulo Grand Prix,PIA,8,8,2,-6,6
+2024,21,São Paulo Grand Prix,HAM,14,10,3,-7,7
+2024,21,São Paulo Grand Prix,RUS,2,4,4,0,0
+2024,21,São Paulo Grand Prix,LAW,5,9,5,-4,4
+2024,21,São Paulo Grand Prix,GAS,13,3,6,3,3
+2024,21,São Paulo Grand Prix,ALO,9,14,7,-7,7
+2024,21,São Paulo Grand Prix,LEC,6,5,8,3,3
+2024,21,São Paulo Grand Prix,PER,12,11,9,-2,2
+2024,21,São Paulo Grand Prix,BEA,15,12,10,-2,2
+2024,21,São Paulo Grand Prix,STR,10,20,11,-9,9
+2024,21,São Paulo Grand Prix,TSU,3,7,12,5,5
+2024,21,São Paulo Grand Prix,BOT,11,13,13,0,0
+2024,21,São Paulo Grand Prix,ALB,7,20,14,-6,6
+2024,21,São Paulo Grand Prix,OCO,4,2,15,13,13
+2024,21,São Paulo Grand Prix,COL,16,20,16,-4,4
+2024,22,Las Vegas Grand Prix,NOR,6,6,1,-5,5
+2024,22,Las Vegas Grand Prix,SAI,2,3,2,-1,1
+2024,22,Las Vegas Grand Prix,HAM,10,2,3,1,1
+2024,22,Las Vegas Grand Prix,PIA,8,7,4,-3,3
+2024,22,Las Vegas Grand Prix,MAG,12,12,5,-7,7
+2024,22,Las Vegas Grand Prix,RUS,1,1,6,5,5
+2024,22,Las Vegas Grand Prix,LEC,4,4,7,3,3
+2024,22,Las Vegas Grand Prix,HUL,9,8,8,0,0
+2024,22,Las Vegas Grand Prix,GAS,3,20,9,-11,11
+2024,22,Las Vegas Grand Prix,LAW,14,16,10,-6,6
+2024,22,Las Vegas Grand Prix,ALO,16,11,11,0,0
+2024,22,Las Vegas Grand Prix,VER,5,5,12,7,7
+2024,22,Las Vegas Grand Prix,TSU,7,9,13,4,4
+2024,22,Las Vegas Grand Prix,PER,15,10,14,4,4
+2024,22,Las Vegas Grand Prix,OCO,11,17,15,-2,2
+2024,22,Las Vegas Grand Prix,ZHO,13,13,16,3,3
+2024,23,Qatar Grand Prix,LEC,5,2,1,-1,1
+2024,23,Qatar Grand Prix,PIA,4,3,2,-1,1
+2024,23,Qatar Grand Prix,NOR,3,10,3,-7,7
+2024,23,Qatar Grand Prix,VER,2,1,4,3,3
+2024,23,Qatar Grand Prix,RUS,1,4,5,1,1
+2024,23,Qatar Grand Prix,SAI,7,6,6,0,0
+2024,23,Qatar Grand Prix,HAM,6,12,7,-5,5
+2024,23,Qatar Grand Prix,TSU,14,13,8,-5,5
+2024,23,Qatar Grand Prix,ALB,16,15,9,-6,6
+2024,23,Qatar Grand Prix,BOT,13,11,10,-1,1
+2024,23,Qatar Grand Prix,ALO,8,7,11,4,4
+2024,23,Qatar Grand Prix,STR,15,20,12,-8,8
+2024,23,Qatar Grand Prix,PER,9,20,13,-7,7
+2024,23,Qatar Grand Prix,MAG,10,9,14,5,5
+2024,23,Qatar Grand Prix,GAS,11,5,15,10,10
+2024,23,Qatar Grand Prix,ZHO,12,8,16,8,8
+2024,24,Abu Dhabi Grand Prix,NOR,1,1,1,0,0
+2024,24,Abu Dhabi Grand Prix,SAI,3,2,2,0,0
+2024,24,Abu Dhabi Grand Prix,HAM,16,4,3,-1,1
+2024,24,Abu Dhabi Grand Prix,MAG,14,16,4,-12,12
+2024,24,Abu Dhabi Grand Prix,ALO,8,9,5,-4,4
+2024,24,Abu Dhabi Grand Prix,RUS,6,5,6,1,1
+2024,24,Abu Dhabi Grand Prix,GAS,5,7,7,0,0
+2024,24,Abu Dhabi Grand Prix,BOT,9,20,8,-12,12
+2024,24,Abu Dhabi Grand Prix,PIA,2,10,9,-1,1
+2024,24,Abu Dhabi Grand Prix,LAW,12,17,10,-7,7
+2024,24,Abu Dhabi Grand Prix,ZHO,15,13,11,-2,2
+2024,24,Abu Dhabi Grand Prix,PER,10,20,12,-8,8
+2024,24,Abu Dhabi Grand Prix,HUL,7,8,13,5,5
+2024,24,Abu Dhabi Grand Prix,VER,4,6,14,8,8
+2024,24,Abu Dhabi Grand Prix,TSU,11,12,15,3,3
+2024,24,Abu Dhabi Grand Prix,STR,13,14,16,2,2

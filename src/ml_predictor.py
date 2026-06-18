@@ -110,7 +110,7 @@ class MLPredictor:
             logger.warning(f"ML Prediction failed: {e}")
             return None
 
-    def get_correction_factor(self, driver, grid_pos, team, track, year, simulated_time_rank):
+    def get_correction_factor(self, driver, grid_pos, team, track, year, simulated_time_rank, track_lap_time=80.0):
         """
         Returns a time adjustment (seconds) based on ML prediction vs Simulation.
         
@@ -128,9 +128,9 @@ class MLPredictor:
         
         position_delta = ml_pos - simulated_time_rank
         
-        # Heuristic: 1 position ~ 3 seconds gap on average?
-        # We apply a soft correction
-        time_penalty = position_delta * 2.5 
+        # Dynamic scaling: 1 position delta ~ 5% of track lap time
+        scale = track_lap_time * 0.05
+        time_penalty = position_delta * scale
         
         # Clip to avoid extreme corrections
-        return np.clip(time_penalty, -20.0, 20.0)
+        return np.clip(time_penalty, -scale * 10, scale * 10)

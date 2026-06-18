@@ -8,7 +8,7 @@ def calculate_sc_time(pit_loss_avg):
 def simulate_race_history(models, strategy_list, total_laps, grid_position=1, consistencies=0.12, 
                          driver_form=1.0, safety_car_prob=0.10, driver_code="", session_context=None,
                          driver_features=None, track_characteristics=None, compound_affinity=None,
-                         reliability_mode: str = "probabilistic", ml_correction=0.0):
+                         reliability_mode: str = "probabilistic", ml_correction=0.0, wet_weather=False):
     """
     ENHANCED STABILITY ENGINE V5.0
     Uses rich feature set for realistic race simulation with track-specific behavior.
@@ -91,6 +91,9 @@ def simulate_race_history(models, strategy_list, total_laps, grid_position=1, co
         deg_severity = 1.0
         track_evolution_rate = 0.010
         reliability_stress = 1.0
+        
+    if wet_weather:
+        deg_severity *= 1.5
     
     # 4. Universal physics
     FUEL_PENALTY = 0.033
@@ -126,7 +129,10 @@ def simulate_race_history(models, strategy_list, total_laps, grid_position=1, co
         for lap_in_stint in range(1, total_laps - laps_completed + 1):
             laps_completed += 1
             
-            is_sc = (random.random() < (safety_car_prob / total_laps))
+            if consistencies == 0.0:
+                is_sc = False
+            else:
+                is_sc = (random.random() < (safety_car_prob / total_laps))
             must_pit = (lap_in_stint == stint_len_planned) and laps_completed < total_laps
             
             if is_sc:
@@ -182,6 +188,8 @@ def simulate_race_history(models, strategy_list, total_laps, grid_position=1, co
 
                 lap_time = (effective_pace + form_effect + fuel_effect + 
                            track_evo_effect + traffic_adj + craft_effect + consistency_noise + lap_bias + warmup_penalty + traffic_penalty)
+                if wet_weather:
+                    lap_time += 15.0
             
             # First lap adjustment
             if laps_completed == 1:
@@ -196,6 +204,8 @@ def simulate_race_history(models, strategy_list, total_laps, grid_position=1, co
                 break
             
             if laps_completed == total_laps:
+                if consistencies == 0.0 and safety_car_prob > 0.0:
+                    history[-1] += safety_car_prob * 48.0
                 # Apply reliability penalty at finish (DNF modeling / conservative risk)
                 if driver_features and ('reliability_risk' in driver_features):
                     final_time = history[-1]
@@ -209,6 +219,9 @@ def simulate_race_history(models, strategy_list, total_laps, grid_position=1, co
                     return history, ("DNF" if dnf else "Finished")
                 return history, "Finished"
     
+    if history and consistencies == 0.0 and safety_car_prob > 0.0:
+        history[-1] += safety_car_prob * 48.0
+
     # Apply reliability if we somehow exit loop without explicit finish
     if driver_features and ('reliability_risk' in driver_features) and history:
         final_time = history[-1]

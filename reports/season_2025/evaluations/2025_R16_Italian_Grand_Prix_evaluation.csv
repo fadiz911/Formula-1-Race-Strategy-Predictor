@@ -1,0 +1,17 @@
+Year,Round,Race,Driver,Start,Actual,Predicted,Misplacement,AbsMisplacement
+2025,16,Italian Grand Prix,NOR,2,2,1,-1,1
+2025,16,Italian Grand Prix,PIA,3,3,2,-1,1
+2025,16,Italian Grand Prix,LEC,4,4,3,-1,1
+2025,16,Italian Grand Prix,VER,1,1,4,3,3
+2025,16,Italian Grand Prix,SAI,13,11,5,-6,6
+2025,16,Italian Grand Prix,RUS,5,5,6,1,1
+2025,16,Italian Grand Prix,ALB,14,7,7,0,0
+2025,16,Italian Grand Prix,HAM,10,6,8,2,2
+2025,16,Italian Grand Prix,TSU,9,13,9,-4,4
+2025,16,Italian Grand Prix,HUL,12,20,10,-10,10
+2025,16,Italian Grand Prix,BOR,7,8,11,3,3
+2025,16,Italian Grand Prix,ALO,8,20,12,-8,8
+2025,16,Italian Grand Prix,STR,16,18,13,-5,5
+2025,16,Italian Grand Prix,OCO,15,15,14,-1,1
+2025,16,Italian Grand Prix,BEA,11,12,15,3,3
+2025,16,Italian Grand Prix,ANT,6,9,16,7,7

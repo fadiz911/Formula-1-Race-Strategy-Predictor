@@ -7,6 +7,19 @@ import fastf1
 import pandas as pd
 import numpy as np
 from collections import defaultdict
+from functools import lru_cache
+
+@lru_cache(maxsize=32)
+def get_and_load_race_session(year, round_num):
+    try:
+        session = fastf1.get_session(year, round_num, 'R')
+        session.load(laps=True, telemetry=False, weather=False, messages=False)
+        return session
+    except Exception as e:
+        # Retry with Q grid fetch fallback or basic session return
+        session = fastf1.get_session(year, round_num, 'R')
+        session.load(laps=False, telemetry=False, weather=False, messages=False)
+        return session
 
 
 def extract_driver_historical_features(driver_code, year, current_round, lookback=5):
@@ -43,8 +56,7 @@ def extract_driver_historical_features(driver_code, year, current_round, lookbac
     for round_num in range(start_round, current_round):
         try:
             # Load race session
-            race_session = fastf1.get_session(year, round_num, 'R')
-            race_session.load(laps=False, telemetry=False, weather=False, messages=False)
+            race_session = get_and_load_race_session(year, round_num)
             
             # Get driver's result
             driver_result = race_session.results[race_session.results['Abbreviation'] == driver_code]
@@ -73,7 +85,6 @@ def extract_driver_historical_features(driver_code, year, current_round, lookbac
             
             # Load lap data for deeper analysis
             try:
-                race_session.load(laps=True, telemetry=False, weather=False, messages=False)
                 driver_laps = race_session.laps[race_session.laps['Driver'] == driver_code]
                 
                 if not driver_laps.empty:
@@ -137,12 +148,21 @@ def extract_driver_historical_features(driver_code, year, current_round, lookbac
         if tire_management:
             # Normalize: lower is better
             features['tire_management_score'] = np.mean(tire_management) / 2.0  # Typical std is ~2s
-        
         if early_gains:
             features['overtaking_ability'] = np.mean(early_gains)
         
         if late_gains:
             features['race_craft'] = np.mean(late_gains)
+            
+    # Sanitize NaN values to prevent simulation failures
+    for k, v in features.items():
+        if pd.isna(v):
+            if k in ['avg_pace_vs_teammate', 'tire_management_score', 'qualifying_conversion']:
+                features[k] = 1.0
+            elif k in ['avg_finish_position', 'avg_quali_position']:
+                features[k] = 20.0
+            else:
+                features[k] = 0.0
     
     return features, races_analyzed
 
@@ -325,8 +345,7 @@ def extract_driver_compound_affinity(driver_code, year, current_round, lookback=
     
     for round_num in range(start_round, current_round):
         try:
-            session = fastf1.get_session(year, round_num, 'R')
-            session.load(laps=True, telemetry=False, weather=False, messages=False)
+            session = get_and_load_race_session(year, round_num)
             
             driver_laps = session.laps[session.laps['Driver'] == driver_code].pick_quicklaps()
             all_laps = session.laps.pick_quicklaps()
@@ -356,7 +375,12 @@ def extract_driver_compound_affinity(driver_code, year, current_round, lookback=
             if field_avg > 0:
                 # < 1.0 means driver is better than field on this compound
                 affinity[compound] = driver_avg / field_avg
-    
+                
+    # Sanitize NaN values
+    for k, v in affinity.items():
+        if pd.isna(v):
+            affinity[k] = 1.0
+     
     return affinity
 
 
